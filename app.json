@@ -16,6 +16,9 @@
       ]
     ],
     "name": "30-day-challenge",
-    "slug": "30-day-challenge"
+    "slug": "30-day-challenge",
+    "android": {
+      "package": "com.expo.test"
+    }
   }
 }
