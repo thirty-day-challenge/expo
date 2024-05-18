@@ -57,6 +57,11 @@ function Form() {
     }
   };
 
+  // TODO: validate usernames
+  const validateUsername = async (username) => {
+    return true;
+  };
+
   return (
     <>
       <View className="gap-3">
@@ -65,7 +70,11 @@ function Form() {
           <Controller
             control={control}
             rules={{
-              required: true,
+              required: "Email address field is required.",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address.",
+              },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="border border-black rounded-lg px-2">
@@ -79,7 +88,9 @@ function Form() {
             name="emailAddress"
           />
           {errors.emailAddress ? (
-            <Text className="text-red-500 text-sm">This is required.</Text>
+            <Text className="text-red-500 text-sm">
+              {errors.emailAddress.message}
+            </Text>
           ) : null}
         </View>
         <View className="gap-0.5">
@@ -87,7 +98,8 @@ function Form() {
           <Controller
             control={control}
             rules={{
-              required: true,
+              required: "Username field is required.",
+              validate: (username) => true || "Username is already taken.",
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="border border-black rounded-lg px-2">
@@ -101,7 +113,9 @@ function Form() {
             name="username"
           />
           {errors.username ? (
-            <Text className="text-red-500 text-sm">This is required.</Text>
+            <Text className="text-red-500 text-sm">
+              {errors.username.message}
+            </Text>
           ) : null}
         </View>
         <View className="gap-0.5">
@@ -109,7 +123,11 @@ function Form() {
           <Controller
             control={control}
             rules={{
-              required: true,
+              required: "Password field is required.",
+              minLength: {
+                value: 8,
+                message: "A minimum length of 8 characters is required.",
+              },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="border border-black rounded-lg px-2">
@@ -123,7 +141,9 @@ function Form() {
             name="password"
           />
           {errors.password ? (
-            <Text className="text-red-500 text-sm">This is required.</Text>
+            <Text className="text-red-500 text-sm">
+              {errors.password.message}
+            </Text>
           ) : null}
         </View>
       </View>
