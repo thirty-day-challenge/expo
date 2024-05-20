@@ -2,11 +2,14 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
-import { useSignUp } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import { useSession, useSignUp } from "@clerk/clerk-expo";
+import { Link, Redirect, useRouter } from "expo-router";
 
 export default function Page() {
   const { top } = useSafeAreaInsets();
+  const { isSignedIn } = useSession();
+
+  if (isSignedIn) return <Redirect href={"/"} />;
 
   return (
     <View

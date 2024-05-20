@@ -8,7 +8,6 @@ import { Link, Redirect, useRouter } from "expo-router";
 export default function Page() {
   const { top } = useSafeAreaInsets();
   const { isSignedIn } = useSession();
-  const router = useRouter();
 
   if (isSignedIn) return <Redirect href={"/"} />;
 

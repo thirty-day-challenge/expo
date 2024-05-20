@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@30-day-challenge/prisma-schema": "^0.0.2",
+    "@30-day-challenge/prisma-schema": "^0.0.4",
     "@clerk/clerk-expo": "^1.1.4",
     "@prisma/client": "^5.14.0",
     "expo": "^51.0.0",
