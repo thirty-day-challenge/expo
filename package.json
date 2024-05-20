@@ -9,13 +9,14 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@30-day-challenge/prisma-schema": "^0.0.4",
+    "@30-day-challenge/prisma-schema": "^0.0.6",
     "@clerk/clerk-expo": "^1.1.4",
     "@prisma/client": "^5.14.0",
     "expo": "^51.0.0",
     "expo-constants": "~16.0.1",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.9",
+    "expo-secure-store": "~13.0.1",
     "expo-splash-screen": "~0.27.4",
     "expo-status-bar": "~1.12.1",
     "nativewind": "^4.0.1",
@@ -28,10 +29,11 @@
     "react-native-screens": "3.31.1",
     "react-native-web": "~0.19.10",
     "tailwindcss": "^3.4.0",
-    "expo-secure-store": "~13.0.1"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@tanstack/eslint-plugin-query": "^5.35.6",
     "@types/react": "~18.2.45",
     "typescript": "~5.3.3"
   },

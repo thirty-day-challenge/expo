@@ -11,7 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import SignOutButton from "@/components/SignOutButton";
 import { Controller, useForm } from "react-hook-form";
-import { useAuth, useSession } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/clerk-expo";
+import { Challenge } from "@prisma/client";
 
 type FormData = { actionPlan: string };
 
@@ -35,7 +36,10 @@ export default function Page() {
       clerkId: userId,
     };
 
-    const returnedData = await fetch(
+    const {
+      message,
+      data: challengeData,
+    }: { message: String; data: Challenge } = await fetch(
       "http://192.168.68.74:3000/api/create-new-challenge",
       {
         method: "PUT",
@@ -46,6 +50,8 @@ export default function Page() {
       .then((response) => response.json())
       .then((data) => data)
       .catch((e) => console.error(`Challenge failed to be created: ${e}`));
+
+    console.log(message, challengeData);
   };
 
   return (
