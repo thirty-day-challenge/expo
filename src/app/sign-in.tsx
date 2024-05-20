@@ -43,6 +43,8 @@ function Form() {
   } = useForm<SignInFormData>();
   const { signIn, setActive, isLoaded } = useSignIn();
 
+  console.log(errors);
+
   const handleSignIn = async (data) => {
     const { emailAddress, password } = data;
 
