@@ -4,16 +4,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth, useSession, useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { Link, Redirect, useRouter } from "expo-router";
+import SafeView from "@/components/SafeView";
 
 export default function Page() {
-  const { top } = useSafeAreaInsets();
   const { isSignedIn } = useSession();
 
   if (isSignedIn) return <Redirect href={"/"} />;
 
   return (
-    <View
-      style={{ paddingTop: top }}
+    <SafeView
+      top
       className="flex flex-1 w-2/3 mx-auto items-center justify-center"
     >
       <View className="flex w-full gap-4">
@@ -26,7 +26,7 @@ export default function Page() {
           </Link>
         </View>
       </View>
-    </View>
+    </SafeView>
   );
 }
 

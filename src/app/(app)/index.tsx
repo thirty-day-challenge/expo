@@ -8,18 +8,50 @@ import {
 } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { ErrorBoundaryProps, useRouter } from "expo-router";
 import SignOutButton from "@/components/SignOutButton";
 import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "@clerk/clerk-expo";
 import { Challenge } from "@prisma/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useChallenges } from "@/lib/hooks/react-query";
+import { queryClient } from "@/lib/util/react-query";
+import SafeView from "@/components/SafeView";
 
-type FormData = { actionPlan: string };
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  return (
+    <SafeView
+      top
+      className="flex-1 flex justify-center items-center bg-red-600"
+    >
+      <Text>{props.error.message}</Text>
+      <Text onPress={props.retry}>Try Again?</Text>
+    </SafeView>
+  );
+}
 
 export default function Page() {
-  const { top } = useSafeAreaInsets();
+  const { data: challengesData, error, isLoading } = useChallenges();
+
+  if (error) {
+    console.error(error);
+    throw new Error("Data fetching error");
+  }
+
+  if (isLoading) return <Text>Loading...</Text>;
+
+  if (challengesData.length === 0) return <NewChallengeForm />;
+
+  return <Text>Hi</Text>;
+}
+
+// <View className="w-5/6 mx-auto">
+//   <Calendar />
+// </View>;
+
+function NewChallengeForm() {
+  type FormData = { actionPlan: string };
   const { userId } = useAuth();
-  const router = useRouter();
 
   const {
     handleSubmit,
@@ -27,20 +59,22 @@ export default function Page() {
     control,
   } = useForm<FormData>();
 
-  const handleCreatePlan = async (data: FormData) => {
+  const mutation = useMutation({
+    mutationFn: handleCreatePlan,
+  });
+
+  async function handleCreatePlan(data: FormData) {
     const { actionPlan } = data;
 
     const challengeInput = {
       title: actionPlan,
-      description: null,
+      wish: "temporary filler wish",
+      dailyAction: "temporary filler dailyAction",
       clerkId: userId,
     };
 
-    const {
-      message,
-      data: challengeData,
-    }: { message: String; data: Challenge } = await fetch(
-      "http://192.168.68.74:3000/api/create-new-challenge",
+    await fetch(
+      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/create-new-challenge`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -49,16 +83,16 @@ export default function Page() {
     )
       .then((response) => response.json())
       .then((data) => data)
-      .catch((e) => console.error(`Challenge failed to be created: ${e}`));
+      .catch((e) => {
+        console.error(`Challenge failed to be created: ${e}`);
+        throw new Error("Something went wrong");
+      });
 
-    console.log(message, challengeData);
-  };
+    queryClient.invalidateQueries({ queryKey: ["challenges"] });
+  }
 
   return (
-    <View
-      style={{ paddingTop: top }}
-      className="flex-1 flex flex-col items-center gap-5 justify-center w-3/4 mx-auto"
-    >
+    <View className="flex-1 flex flex-col items-center gap-5 justify-center w-3/4 mx-auto">
       <Text className="font-bold text-lg">
         What is your daily action plan for your 30 day challenge?
       </Text>
@@ -87,17 +121,13 @@ export default function Page() {
       </View>
       <Pressable
         className="px-3 py-2 bg-blue-500 mr-auto rounded-lg"
-        onPress={handleSubmit(handleCreatePlan)}
+        onPress={handleSubmit((data) => mutation.mutate(data))}
       >
         <Text className="text-white">Submit</Text>
       </Pressable>
     </View>
   );
 }
-
-// <View className="w-5/6 mx-auto">
-//   <Calendar />
-// </View>;
 
 function Calendar() {
   const data = [
