@@ -1,4 +1,4 @@
-import { ChallengeSchema } from "@30-day-challenge/prisma-schema";
+import { ChallengeSchema } from "@30-day-challenge/prisma-zod";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";

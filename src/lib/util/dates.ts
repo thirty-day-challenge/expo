@@ -1,5 +1,5 @@
 import { addDays, eachDayOfInterval, getDay, subDays } from "date-fns";
-import { ChallengeSchema } from "@30-day-challenge/prisma-schema";
+import { ChallengeSchema } from "@30-day-challenge/prisma-zod";
 import { z } from "zod";
 import { ChallengeIncludingDailyProgressSchema } from "../hooks/react-query";
 

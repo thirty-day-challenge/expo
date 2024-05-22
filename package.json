@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@30-day-challenge/prisma-schema": "^0.0.18",
+    "@30-day-challenge/prisma-zod": "^1.0.12",
     "@clerk/clerk-expo": "^1.1.4",
     "@prisma/client": "^5.14.0",
     "@tanstack/react-query": "^5.37.1",
@@ -22,6 +22,7 @@
     "expo-secure-store": "~13.0.1",
     "expo-splash-screen": "~0.27.4",
     "expo-status-bar": "~1.12.1",
+    "ky": "^0.9.0",
     "nativewind": "^4.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
