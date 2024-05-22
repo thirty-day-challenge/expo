@@ -42,10 +42,10 @@ function Form() {
     formState: { errors },
   } = useForm<SignInFormData>();
   const { signIn, setActive, isLoaded } = useSignIn();
+  if (!signIn || !setActive || !isLoaded)
+    throw new Error("Clerk useSignIn hook not loaded");
 
-  console.log(errors);
-
-  const handleSignIn = async (data) => {
+  const handleSignIn = async (data: SignInFormData) => {
     const { emailAddress, password } = data;
 
     try {

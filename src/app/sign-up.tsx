@@ -43,24 +43,23 @@ function Form() {
   } = useForm<SignUpFormData>();
   const { signUp, setActive } = useSignUp();
 
-  const handleSignUp = async (data) => {
+  const handleSignUp = async (data: SignUpFormData) => {
     const { emailAddress, username, password } = data;
 
     try {
-      const completedSignUp = await signUp.create({
+      const completedSignUp = await signUp!.create({
         emailAddress,
         username,
         password,
       });
 
-      await setActive({ session: completedSignUp.createdSessionId });
+      await setActive!({ session: completedSignUp.createdSessionId });
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
     }
   };
 
-  // TODO: validate usernames
-  const validateUsername = async (username) => {
+  const validateUsername = async (username: string) => {
     return true;
   };
 

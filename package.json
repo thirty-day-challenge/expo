@@ -14,6 +14,7 @@
     "@prisma/client": "^5.14.0",
     "@tanstack/react-query": "^5.37.1",
     "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
     "expo": "^51.0.0",
     "expo-constants": "~16.0.1",
     "expo-linking": "~6.3.1",

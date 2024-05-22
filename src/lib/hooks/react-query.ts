@@ -3,9 +3,17 @@ import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
+export const ChallengeIncludingDailyProgressSchema = ChallengeSchema.merge(
+  z.object({
+    dailyProgress: z.any(),
+  })
+);
+const ChallengesIncludingDailyProgressSchema =
+  ChallengeIncludingDailyProgressSchema.array();
+
 const getChallenges = async (userId: string) => {
   const { message, data } = await fetch(
-    "http://192.168.68.74:3000/api/get-challenges",
+    `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/get-challenges`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19,10 +27,8 @@ const getChallenges = async (userId: string) => {
       throw new Error("Challenges failed to be fetched");
     });
 
-  const schema = ChallengeSchema.extend({ dailyProgress: z.any() }).array();
-
   try {
-    const validatedData = schema.parse(data);
+    const validatedData = ChallengesIncludingDailyProgressSchema.parse(data);
     return validatedData;
   } catch (e) {
     console.error("Validation failed");
@@ -31,10 +37,19 @@ const getChallenges = async (userId: string) => {
 };
 
 export const useChallenges = () => {
-  const { userId } = useAuth();
+  const { userId, isLoaded } = useAuth();
+
+  const queryFn = () => {
+    if (!isLoaded || !userId) {
+      return Promise.resolve([]);
+    }
+    return getChallenges(userId);
+  };
+
   return useQuery({
     queryKey: ["challenges"],
-    queryFn: () => getChallenges(userId),
+    queryFn,
+    enabled: isLoaded && Boolean(userId),
     retry: false,
   });
 };

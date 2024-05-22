@@ -26,7 +26,7 @@ export default function Layout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ClerkProvider
-        publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
         tokenCache={tokenCache}
       >
         <Slot />
