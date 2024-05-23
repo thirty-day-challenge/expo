@@ -22,6 +22,9 @@ export default function NewChallengeForm() {
   const { data: challengeData } = useChallenges();
   const { mutate } = useMutation({
     mutationFn: handleCreatePlan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["challenges"] });
+    },
   });
 
   async function handleCreatePlan(data: FormData) {
@@ -48,8 +51,6 @@ export default function NewChallengeForm() {
         console.error(`Challenge failed to be created: ${e}`);
         throw new Error("Something went wrong");
       });
-
-    queryClient.invalidateQueries({ queryKey: ["challenges"] });
   }
 
   if (challengeData && challengeData.length >= 1)

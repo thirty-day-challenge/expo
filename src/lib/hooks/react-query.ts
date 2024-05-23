@@ -1,37 +1,32 @@
-import { ChallengeSchema } from "@30-day-challenge/prisma-zod";
+import {
+  ChallengeSchema,
+  DailyProgressSchema,
+} from "@30-day-challenge/prisma-zod";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
+import ky from "ky";
 import { z } from "zod";
 
-export const ChallengeIncludingDailyProgressSchema = ChallengeSchema.merge(
-  z.object({
-    dailyProgress: z.any(),
-  })
-);
-const ChallengesIncludingDailyProgressSchema =
-  ChallengeIncludingDailyProgressSchema.array();
-
 const getChallenges = async (userId: string) => {
-  const { message, data } = await fetch(
-    `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/get-challenges`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clerkId: userId }),
-    }
-  )
-    .then((response) => response.json())
-    .then((data) => data)
+  const response = await ky
+    .post(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/get-challenges`, {
+      json: { clerkId: userId },
+    })
+    .json()
     .catch((e) => {
       console.error(e);
-      throw new Error("Challenges failed to be fetched");
     });
 
+  const ResponseSchema = z.object({
+    message: z.string(),
+    data: ChallengeSchema.array(),
+  });
+
   try {
-    const validatedData = ChallengesIncludingDailyProgressSchema.parse(data);
-    return validatedData;
+    const validatedData = ResponseSchema.parse(response);
+    return validatedData.data;
   } catch (e) {
-    console.error("Validation failed");
+    console.error("Validation failed:", e);
     throw new Error("Validation failed");
   }
 };
@@ -48,6 +43,47 @@ export const useChallenges = () => {
 
   return useQuery({
     queryKey: ["challenges"],
+    queryFn,
+    enabled: isLoaded && Boolean(userId),
+    retry: false,
+  });
+};
+
+const getDailyProgress = async (userId: string) => {
+  const response = await ky
+    .post(
+      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/view-progress-completion`,
+      {
+        json: { clerkId: userId },
+        retry: 0,
+      }
+    )
+    .json()
+    .catch((e) => console.error(e));
+
+  const ResponseSchema = DailyProgressSchema.array();
+
+  try {
+    const validatedData = ResponseSchema.parse(response);
+    return validatedData;
+  } catch (e) {
+    console.log("Validation error:", e);
+    throw new Error("Validation error!");
+  }
+};
+
+export const useDailyProgress = () => {
+  const { userId, isLoaded } = useAuth();
+
+  const queryFn = () => {
+    if (!isLoaded || !userId) {
+      return Promise.resolve([]);
+    }
+    return getDailyProgress(userId);
+  };
+
+  return useQuery({
+    queryKey: ["daily-progress"],
     queryFn,
     enabled: isLoaded && Boolean(userId),
     retry: false,

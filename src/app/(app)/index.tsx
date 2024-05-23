@@ -14,10 +14,17 @@ import { Controller, useForm } from "react-hook-form";
 import { useAuth, useSession } from "@clerk/clerk-expo";
 import { Challenge } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useChallenges } from "@/lib/hooks/react-query";
+import { useChallenges, useDailyProgress } from "@/lib/hooks/react-query";
 import { queryClient } from "@/lib/util/react-query";
 import SafeView from "@/components/SafeView";
-import { addDays, eachDayOfInterval, getDate, getDay, subDays } from "date-fns";
+import {
+  addDays,
+  eachDayOfInterval,
+  getDate,
+  getDay,
+  isSameDay,
+  subDays,
+} from "date-fns";
 import { createCalendarDates, gridData } from "@/lib/util/dates";
 import {
   DailyProgressOptionalDefaults,
@@ -39,13 +46,16 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
 }
 
 export default function Page() {
-  const { data: challengesData, error, isLoading } = useChallenges();
-  if (error) {
-    console.error(error);
-    throw new Error("Data fetching error");
-  }
+  const {
+    data: challengesData,
+    error,
+    isLoading: isChallengesLoading,
+  } = useChallenges();
+  const { isLoading: isDailyProgressDataLoading, data: temp } =
+    useDailyProgress();
 
-  if (isLoading) return <Text>Challenges data is loading...</Text>;
+  if (isChallengesLoading || isDailyProgressDataLoading)
+    return <Text>Challenges data is loading...</Text>;
 
   if (!challengesData || challengesData.length === 0)
     return <Redirect href={"/new-challenge-form"} />;
@@ -59,10 +69,13 @@ export default function Page() {
 
 function Calendar() {
   // data has to be fetched and successful for this component to be rendered
-  const { data } = useChallenges();
+  const { data: challengesData } = useChallenges();
+  const { data: dailyProgressData } = useDailyProgress();
 
-  const challenge = data![0];
-  const gridData = createCalendarDates(challenge);
+  if (dailyProgressData == undefined) throw new Error();
+
+  const challenge = challengesData![0];
+  const gridData = createCalendarDates(challenge, dailyProgressData);
 
   return (
     <View className="">
@@ -82,23 +95,29 @@ function Day({
   separators,
 }: ListRenderItemInfo<gridData[number]>) {
   const { data: challengesData } = useChallenges();
+  const { data: dailyProgressData } = useDailyProgress();
   const { userId } = useAuth();
+  const { mutate } = useMutation({
+    mutationFn: handlePress,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["daily-progress"] });
+    },
+  });
 
-  const handlePress = async () => {
-    type Input = {
-      date: Date;
-      completed: boolean;
-      challengeId: string;
+  async function handlePress() {
+    const schema = DailyProgressOptionalDefaultsSchema.omit({
+      userId: true,
+    }).extend({ clerkId: z.string() });
+
+    type reqBody = Omit<DailyProgressOptionalDefaults, "userId"> & {
       clerkId: string;
-      id?: string | undefined;
-      createdAt?: Date | undefined;
-      updatedAt?: Date | undefined;
     };
 
-    const reqBody: Input = {
+    const reqBody: reqBody = {
+      id: item.dailyProgress?.id || undefined,
       clerkId: userId!,
       date: item.dateValue,
-      completed: true,
+      completed: item.dailyProgress?.completed == true ? false : true,
       challengeId: challengesData![0].id,
     };
 
@@ -114,17 +133,15 @@ function Day({
           e
         )
       );
-
-    if (response) {
-      // revalidate
-    }
-  };
+  }
 
   return (
     <Pressable
-      className="bg-white m-[1px] flex-1 aspect-square"
+      className={`m-[1px] flex-1 aspect-square ${
+        item.dailyProgress?.completed ? "bg-green-500" : "bg-white"
+      }`}
       key={index}
-      onPress={handlePress}
+      onPress={() => mutate()}
     >
       <Text
         className={item.isPadding ? "text-neutral-500" : "text-black font-bold"}
