@@ -1,8 +1,11 @@
 import {
   addDays,
   eachDayOfInterval,
+  endOfDay,
   getDay,
   isSameDay,
+  isWithinInterval,
+  startOfDay,
   subDays,
 } from "date-fns";
 import {
@@ -70,4 +73,11 @@ export const createCalendarDates = (
   }
 
   return gridData;
+};
+
+export const isDateValid = (dateToCheck: Date, startDate: Date) => {
+  return isWithinInterval(dateToCheck, {
+    start: startOfDay(startDate),
+    end: endOfDay(new Date()),
+  });
 };

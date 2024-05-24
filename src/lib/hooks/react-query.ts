@@ -1,5 +1,6 @@
 import {
   ChallengeSchema,
+  DailyProgress,
   DailyProgressSchema,
 } from "@30-day-challenge/prisma-zod";
 import { useAuth } from "@clerk/clerk-expo";
@@ -49,6 +50,8 @@ export const useChallenges = () => {
   });
 };
 
+export type daily_progress = DailyProgress[];
+
 const getDailyProgress = async (userId: string) => {
   const response = await ky
     .post(
@@ -67,7 +70,7 @@ const getDailyProgress = async (userId: string) => {
     const validatedData = ResponseSchema.parse(response);
     return validatedData;
   } catch (e) {
-    console.log("Validation error:", e);
+    console.error("Validation error:", e);
     throw new Error("Validation error!");
   }
 };
