@@ -1,64 +1,31 @@
 import { View, Text, Pressable, TextInput } from "react-native";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useAuth } from "@clerk/clerk-expo";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/util/react-query";
-import { Redirect, router } from "expo-router";
-import { useChallenges } from "@/lib/hooks/react-query";
+import { MutateOptions } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { EditChallengeSearchParams } from "@/app/(app)/challenge-forms/edit";
+import { Challenge } from "@30-day-challenge/prisma-zod";
 
-type FormData = { title: string; wish: string; dailyAction: string };
-
-export default function NewChallengeForm() {
-  const { userId } = useAuth();
-
+export type FormData = { title: string; wish: string; dailyAction: string };
+export type ChallengeFormProps = {
+  mutate: (
+    variables: FormData,
+    options?: MutateOptions<Challenge, Error, FormData, unknown> | undefined
+  ) => void;
+  searchParams: Partial<EditChallengeSearchParams>;
+};
+export function ChallengeForm({
+  mutate,
+  searchParams: { id, title, wish, dailyAction },
+}: ChallengeFormProps) {
   const {
     handleSubmit,
     formState: { errors },
     control,
   } = useForm<FormData>();
 
-  const { data: challengeData } = useChallenges();
-  const { mutate } = useMutation({
-    mutationFn: handleCreatePlan,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["challenges"] });
-    },
-  });
-
-  async function handleCreatePlan(data: FormData) {
-    const { title, wish, dailyAction } = data;
-
-    const challengeInput = {
-      title,
-      wish,
-      dailyAction,
-      clerkId: userId,
-    };
-
-    await fetch(
-      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/create-new-challenge`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(challengeInput),
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => data)
-      .catch((e) => {
-        console.error(`Challenge failed to be created: ${e}`);
-        throw new Error("Something went wrong");
-      });
-  }
-
-  if (challengeData && challengeData.length >= 1)
-    return <Redirect href={"/"} />;
-
   return (
-    <View className="flex-1 flex flex-col items-center gap-5 justify-center w-3/4 mx-auto">
-      <Text className="font-bold text-xl w-full">Create Your Challenge!</Text>
+    <>
       <View className="w-full gap-3">
         <View className="w-full flex gap-3">
           <Text className="font-bold text-lg">Title</Text>
@@ -69,7 +36,9 @@ export default function NewChallengeForm() {
               rules={{
                 required: "Please enter a title!",
               }}
-              defaultValue={`${format(new Date(), "LLLL")} Challenge`}
+              defaultValue={
+                title ? title : `${format(new Date(), "LLLL")} Challenge`
+              }
               render={({ field: { onBlur, onChange, value } }) => (
                 <View className="border border-black rounded-lg px-2 w-full">
                   <TextInput
@@ -96,6 +65,7 @@ export default function NewChallengeForm() {
               rules={{
                 required: "Please enter a wish!",
               }}
+              defaultValue={wish ? wish : ""}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View className="border border-black rounded-lg px-2 w-full">
                   <TextInput
@@ -122,6 +92,7 @@ export default function NewChallengeForm() {
               rules={{
                 required: "Please enter a daily action!",
               }}
+              defaultValue={dailyAction ? dailyAction : ""}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View className="border border-black rounded-lg px-2 w-full">
                   <TextInput
@@ -146,6 +117,6 @@ export default function NewChallengeForm() {
       >
         <Text className="text-white">Submit</Text>
       </Pressable>
-    </View>
+    </>
   );
 }

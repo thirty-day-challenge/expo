@@ -4,16 +4,12 @@ import {
   Pressable,
   FlatList,
   ListRenderItemInfo,
-  TextInput,
 } from "react-native";
 import React from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ErrorBoundaryProps, Redirect, useRouter } from "expo-router";
-import SignOutButton from "@/components/SignOutButton";
-import { Controller, useForm } from "react-hook-form";
-import { useAuth, useSession } from "@clerk/clerk-expo";
+import { ErrorBoundaryProps, Link, Redirect } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 import { Challenge } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   daily_progress,
   useChallenges,
@@ -21,25 +17,15 @@ import {
 } from "@/lib/hooks/react-query";
 import { queryClient } from "@/lib/util/react-query";
 import SafeView from "@/components/SafeView";
-import {
-  addDays,
-  eachDayOfInterval,
-  endOfDay,
-  getDate,
-  getDay,
-  isSameDay,
-  isWithinInterval,
-  startOfDay,
-  subDays,
-} from "date-fns";
+import { getDate } from "date-fns";
 import { createCalendarDates, gridData, isDateValid } from "@/lib/util/dates";
 import {
   DailyProgressOptionalDefaults,
-  DailyProgressOptionalDefaultsSchema,
   DailyProgressSchema,
 } from "@30-day-challenge/prisma-zod";
 import { z } from "zod";
-import ky, { HTTPError } from "ky";
+import ky from "ky";
+import { EditIcon, Pencil } from "lucide-react-native";
 
 export function ErrorBoundary(props: ErrorBoundaryProps) {
   return (
@@ -59,37 +45,39 @@ export default function Page() {
     error,
     isLoading: isChallengesLoading,
   } = useChallenges();
-  const { isLoading: isDailyProgressDataLoading, data: temp } =
-    useDailyProgress();
+  const { isLoading: isDailyProgressDataLoading } = useDailyProgress();
 
   if (isChallengesLoading || isDailyProgressDataLoading)
     return <Text>Challenges data is loading...</Text>;
 
   if (!challengesData || challengesData.length === 0)
-    return <Redirect href={"/new-challenge-form"} />;
+    return <Redirect href={"/challenge-forms/create"} />;
 
   return (
-    <View className="w-5/6 mx-auto">
+    <View className="w-5/6 mx-auto gap-5">
+      <ChallengeInfo challenge={challengesData[0]} />
       <Calendar />
     </View>
   );
 }
 
-function Calendar() {
-  const { data: challengesData } = useChallenges();
-  const { data: dailyProgressData } = useDailyProgress();
-
-  if (dailyProgressData == undefined) throw new Error();
-
-  const challenge = challengesData![0];
-  const gridData = createCalendarDates(challenge, dailyProgressData);
-
+function ChallengeInfo({ challenge }: { challenge: Challenge }) {
   return (
     <View className="gap-5">
       <View className="gap-2">
-        <Text className="text-xl font-bold tracking-tight">
-          Your Challenge:
-        </Text>
+        <View className="flex flex-row justify-between items-center">
+          <Text className="text-xl font-bold tracking-tight">
+            Your Challenge:
+          </Text>
+          <Link
+            href={`/challenge-forms/edit/?title=${challenge.title}&wish=${challenge.wish}&dailyAction=${challenge.dailyAction}&id=${challenge.id}`}
+            asChild
+          >
+            <Pressable className="bg-black p-1.5 rounded-lg">
+              <Pencil size={20} color={"white"} />
+            </Pressable>
+          </Link>
+        </View>
         <View className="gap-2">
           <View>
             <Text className="font-bold">Title:</Text>
@@ -105,13 +93,26 @@ function Calendar() {
           </View>
         </View>
       </View>
-      <FlatList
-        data={gridData}
-        renderItem={(item) => <Day {...item} />}
-        numColumns={7}
-        className="bg-slate-400 p-[1px]"
-      />
     </View>
+  );
+}
+
+function Calendar() {
+  const { data: challengesData } = useChallenges();
+  const { data: dailyProgressData } = useDailyProgress();
+
+  if (dailyProgressData == undefined) throw new Error();
+
+  const challenge = challengesData![0];
+  const gridData = createCalendarDates(challenge, dailyProgressData);
+
+  return (
+    <FlatList
+      data={gridData}
+      renderItem={(item) => <Day {...item} />}
+      numColumns={7}
+      className="bg-slate-400 p-[1px]"
+    />
   );
 }
 

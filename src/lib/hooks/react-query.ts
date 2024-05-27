@@ -1,4 +1,5 @@
 import {
+  Challenge,
   ChallengeSchema,
   DailyProgress,
   DailyProgressSchema,
@@ -31,6 +32,8 @@ const getChallenges = async (userId: string) => {
     throw new Error("Validation failed");
   }
 };
+
+export type challenges = Challenge[];
 
 export const useChallenges = () => {
   const { userId, isLoaded } = useAuth();
