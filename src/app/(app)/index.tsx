@@ -166,8 +166,6 @@ function Day({
         )
       );
 
-    console.log(response);
-
     const ResponseSchema = z.object({
       message: z.string(),
       data: DailyProgressSchema,
