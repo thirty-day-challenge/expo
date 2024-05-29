@@ -154,10 +154,10 @@ function Day({
   };
   async function mutateDailyProgress(reqBody: reqBody) {
     const response = await ky
-      .put(
-        `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/modify-progress-completion`,
-        { json: reqBody, retry: 0 }
-      )
+      .put(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/daily-progress/modify`, {
+        json: reqBody,
+        retry: 0,
+      })
       .json()
       .catch((e) =>
         console.error(
@@ -165,6 +165,8 @@ function Day({
           e
         )
       );
+
+    console.log(response);
 
     const ResponseSchema = z.object({
       message: z.string(),
