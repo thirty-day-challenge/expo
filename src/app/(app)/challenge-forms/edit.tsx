@@ -1,15 +1,16 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/util/react-query";
-import { Redirect, router, useLocalSearchParams } from "expo-router";
+import { Link, Redirect, router, useLocalSearchParams } from "expo-router";
 import { challenges, useChallenges } from "@/lib/hooks/react-query";
 import { ChallengeForm, FormData } from "@/components/ChallengeForm";
 import ky from "ky";
 import { z } from "zod";
 import { ChallengeSchema } from "@30-day-challenge/prisma-zod";
+import { ArrowLeftFromLine, X } from "lucide-react-native";
 
 export type EditChallengeSearchParams = {
   id: string;
@@ -71,9 +72,16 @@ export default function EditChallenge() {
   }
 
   return (
-    <View className="flex-1 flex flex-col items-center gap-5 justify-center w-3/4 mx-auto">
-      <Text className="font-bold text-xl w-full">Edit Your Challenge!</Text>
-      <ChallengeForm mutate={mutate} searchParams={searchParams} />
-    </View>
+    <>
+      <Link href={"/"} asChild>
+        <Pressable className="bg-black rounded-md p-2 absolute top-14 left-10">
+          <ArrowLeftFromLine size={20} color="white" />
+        </Pressable>
+      </Link>
+      <View className="flex-1 flex flex-col items-center gap-5 justify-center w-3/4 mx-auto">
+        <Text className="font-bold text-xl w-full">Edit Your Challenge!</Text>
+        <ChallengeForm mutate={mutate} searchParams={searchParams} />
+      </View>
+    </>
   );
 }

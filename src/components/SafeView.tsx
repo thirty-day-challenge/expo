@@ -35,7 +35,7 @@ export default function SafeView({
         paddingBottom: bottom ? bottomPadding : 0,
         paddingLeft: left ? leftPadding : 0,
       }}
-      className={cn("flex-1", className)}
+      className={cn("flex-1 relative", className)}
     >
       {children}
     </View>
