@@ -50,7 +50,7 @@ export default function EditChallenge() {
     };
 
     const response = await ky
-      .put(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/update-challenge`, {
+      .put(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/challenge/update`, {
         json: challengeInput,
       })
       .json()

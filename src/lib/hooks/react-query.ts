@@ -11,7 +11,7 @@ import { z } from "zod";
 
 const getChallenges = async (userId: string) => {
   const response = await ky
-    .post(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/get-challenges`, {
+    .post(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/challenge/get`, {
       json: { clerkId: userId },
     })
     .json()
@@ -58,7 +58,7 @@ export type daily_progress = DailyProgress[];
 const getDailyProgress = async (userId: string) => {
   const response = await ky
     .post(
-      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/view-progress-completion`,
+      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/daily-progress/get-by-challenge`,
       {
         json: { clerkId: userId },
         retry: 0,

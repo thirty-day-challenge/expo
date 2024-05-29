@@ -38,14 +38,11 @@ export default function NewChallengeForm() {
       clerkId: userId,
     };
 
-    await fetch(
-      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/create-new-challenge`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(challengeInput),
-      }
-    )
+    await fetch(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/challenge/create`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(challengeInput),
+    })
       .then((response) => response.json())
       .then((data) => data)
       .catch((e) => {
