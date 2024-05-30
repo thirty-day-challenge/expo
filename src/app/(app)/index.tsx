@@ -25,7 +25,7 @@ import {
 } from "@30-day-challenge/prisma-zod";
 import { z } from "zod";
 import ky from "ky";
-import { EditIcon, Pencil } from "lucide-react-native";
+import { Pencil } from "lucide-react-native";
 
 export function ErrorBoundary(props: ErrorBoundaryProps) {
   return (
@@ -64,7 +64,7 @@ export default function Page() {
 function EditChallengeButton({ challenge }: { challenge: Challenge }) {
   return (
     <Link
-      href={`/challenge-forms/edit/?title=${challenge.title}&wish=${challenge.wish}&dailyAction=${challenge.dailyAction}&id=${challenge.id}`}
+      href={`/challenge-forms/edit/?title=${challenge.title}&wish=${challenge.wish}&dailyAction=${challenge.dailyAction}&id=${challenge.id}&icon=${challenge.icon}`}
       asChild
     >
       <Pressable className="bg-black p-1.5 rounded-lg">

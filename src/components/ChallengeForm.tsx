@@ -1,10 +1,16 @@
 import { View, Text, Pressable, TextInput } from "react-native";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { MutateOptions } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { EditChallengeSearchParams } from "@/app/(app)/challenge-forms/edit";
-import { Challenge } from "@30-day-challenge/prisma-zod";
+import { ChallengeSchema } from "@30-day-challenge/prisma-zod";
+import ky from "ky";
+import { z } from "zod";
+import { router } from "expo-router";
+import { queryClient } from "@/lib/util/react-query";
+import { challenges } from "@/lib/hooks/react-query";
+import { useAuth } from "@clerk/clerk-expo";
 
 export type FormData = {
   title: string;
@@ -13,25 +19,81 @@ export type FormData = {
   icon: string;
 };
 export type ChallengeFormProps = {
-  mutate: (
-    variables: FormData,
-    options?: MutateOptions<Challenge, Error, FormData, unknown> | undefined
-  ) => void;
   searchParams?: Partial<EditChallengeSearchParams>;
 };
-export function ChallengeForm({ mutate, searchParams }: ChallengeFormProps) {
+
+export function ChallengeForm({ searchParams }: ChallengeFormProps) {
   const {
     id = undefined,
     title = undefined,
     wish = undefined,
     dailyAction = undefined,
+    icon = undefined,
   } = searchParams || {};
+
+  const { userId } = useAuth();
 
   const {
     handleSubmit,
     formState: { errors },
     control,
   } = useForm<FormData>();
+
+  const { mutate } = useMutation({
+    mutationFn: handleFormSubmission,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["challenges"], (oldData: challenges) => {
+        if (searchParams)
+          return oldData.map((challenge) => {
+            if (challenge.id === searchParams.id) {
+              return data;
+            }
+            return challenge;
+          });
+
+        return [...oldData, data];
+      });
+      router.push("/");
+    },
+  });
+
+  async function handleFormSubmission(data: FormData) {
+    const { title, wish, dailyAction, icon } = data;
+
+    const challengeInput = {
+      title,
+      wish,
+      dailyAction,
+      icon,
+      ...(searchParams ? { id: searchParams.id } : { clerkId: userId }),
+    };
+
+    const response = await ky
+      .put(
+        `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/challenge/${
+          searchParams ? "update" : "create"
+        }`,
+        {
+          json: challengeInput,
+        }
+      )
+      .json()
+      .catch((e) => {
+        throw new Error(`Challenge failed to be updated: ${e}`);
+      });
+
+    const ResponseSchema = z.object({
+      message: z.string(),
+      data: ChallengeSchema,
+    });
+
+    try {
+      const { data } = ResponseSchema.parse(response);
+      return data;
+    } catch (error) {
+      throw new Error("Validation failed: " + error);
+    }
+  }
 
   const validateEmoji = (emojiString: string) => {
     const emojiRegex =
@@ -129,6 +191,7 @@ export function ChallengeForm({ mutate, searchParams }: ChallengeFormProps) {
             ) : null}
           </View>
         </View>
+        {/* icon */}
         <View className="w-full flex gap-3">
           <Text className="font-bold text-lg">Icon</Text>
           <View className="w-full gap-0.5">
@@ -139,7 +202,7 @@ export function ChallengeForm({ mutate, searchParams }: ChallengeFormProps) {
                 required: "Please enter an emoji!",
                 validate: validateEmoji,
               }}
-              defaultValue={"✅"}
+              defaultValue={icon ? icon : "✅"}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View className="border border-black rounded-lg px-2 w-full">
                   <TextInput
