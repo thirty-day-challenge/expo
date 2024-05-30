@@ -17,12 +17,16 @@ export type ChallengeFormProps = {
     variables: FormData,
     options?: MutateOptions<Challenge, Error, FormData, unknown> | undefined
   ) => void;
-  searchParams: Partial<EditChallengeSearchParams>;
+  searchParams?: Partial<EditChallengeSearchParams>;
 };
-export function ChallengeForm({
-  mutate,
-  searchParams: { id, title, wish, dailyAction },
-}: ChallengeFormProps) {
+export function ChallengeForm({ mutate, searchParams }: ChallengeFormProps) {
+  const {
+    id = undefined,
+    title = undefined,
+    wish = undefined,
+    dailyAction = undefined,
+  } = searchParams || {};
+
   const {
     handleSubmit,
     formState: { errors },

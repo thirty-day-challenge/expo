@@ -40,13 +40,14 @@ export default function EditChallenge() {
   });
 
   async function handleCreatePlan(data: FormData) {
-    const { title, wish, dailyAction } = data;
+    const { title, wish, dailyAction, icon } = data;
 
     const challengeInput = {
       id: searchParams.id,
       title,
       wish,
       dailyAction,
+      icon,
     };
 
     const response = await ky
