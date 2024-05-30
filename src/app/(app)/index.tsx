@@ -61,6 +61,19 @@ export default function Page() {
   );
 }
 
+function EditChallengeButton({ challenge }: { challenge: Challenge }) {
+  return (
+    <Link
+      href={`/challenge-forms/edit/?title=${challenge.title}&wish=${challenge.wish}&dailyAction=${challenge.dailyAction}&id=${challenge.id}`}
+      asChild
+    >
+      <Pressable className="bg-black p-1.5 rounded-lg">
+        <Pencil size={20} color={"white"} />
+      </Pressable>
+    </Link>
+  );
+}
+
 function ChallengeInfo({ challenge }: { challenge: Challenge }) {
   return (
     <View className="gap-5">
@@ -69,14 +82,7 @@ function ChallengeInfo({ challenge }: { challenge: Challenge }) {
           <Text className="text-xl font-bold tracking-tight">
             Your Challenge:
           </Text>
-          <Link
-            href={`/challenge-forms/edit/?title=${challenge.title}&wish=${challenge.wish}&dailyAction=${challenge.dailyAction}&id=${challenge.id}`}
-            asChild
-          >
-            <Pressable className="bg-black p-1.5 rounded-lg">
-              <Pencil size={20} color={"white"} />
-            </Pressable>
-          </Link>
+          <EditChallengeButton challenge={challenge} />
         </View>
         <View className="gap-2">
           <View>

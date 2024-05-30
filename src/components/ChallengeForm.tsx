@@ -6,7 +6,12 @@ import { format } from "date-fns";
 import { EditChallengeSearchParams } from "@/app/(app)/challenge-forms/edit";
 import { Challenge } from "@30-day-challenge/prisma-zod";
 
-export type FormData = { title: string; wish: string; dailyAction: string };
+export type FormData = {
+  title: string;
+  wish: string;
+  dailyAction: string;
+  icon: string;
+};
 export type ChallengeFormProps = {
   mutate: (
     variables: FormData,
@@ -24,9 +29,17 @@ export function ChallengeForm({
     control,
   } = useForm<FormData>();
 
+  const validateEmoji = (emojiString: string) => {
+    const emojiRegex =
+      /^(?:\uD83D[\uDC00-\uDFFF]|\uD83C[\uDDE0-\uDDFF]|\uD83E[\uDD00-\uDDFF]|[\u2600-\u26FF\u2700-\u27BF\u2B50-\u2B55\u2E3A\u2E3B\u3030\u303D\u3297\u3299]|\uD83C[\uDC00-\uDFFF])$/;
+
+    return emojiRegex.test(emojiString) ? true : "Please enter a valid emoji!";
+  };
+
   return (
     <>
       <View className="w-full gap-3">
+        {/* title */}
         <View className="w-full flex gap-3">
           <Text className="font-bold text-lg">Title</Text>
           <View className="w-full gap-0.5">
@@ -56,6 +69,7 @@ export function ChallengeForm({
             ) : null}
           </View>
         </View>
+        {/* wish */}
         <View className="w-full flex gap-3">
           <Text className="font-bold text-lg">Wish</Text>
           <View className="w-full gap-0.5">
@@ -83,6 +97,7 @@ export function ChallengeForm({
             ) : null}
           </View>
         </View>
+        {/* daily action */}
         <View className="w-full flex gap-3">
           <Text className="font-bold text-lg">Daily Action</Text>
           <View className="w-full gap-0.5">
@@ -106,6 +121,34 @@ export function ChallengeForm({
             {errors.dailyAction ? (
               <Text className="text-red-500 text-sm">
                 {errors.dailyAction.message}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <View className="w-full flex gap-3">
+          <Text className="font-bold text-lg">Icon</Text>
+          <View className="w-full gap-0.5">
+            <Controller
+              control={control}
+              name="icon"
+              rules={{
+                required: "Please enter an emoji!",
+                validate: validateEmoji,
+              }}
+              defaultValue={"✅"}
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View className="border border-black rounded-lg px-2 w-full">
+                  <TextInput
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                </View>
+              )}
+            />
+            {errors.icon ? (
+              <Text className="text-red-500 text-sm">
+                {errors.icon.message}
               </Text>
             ) : null}
           </View>
