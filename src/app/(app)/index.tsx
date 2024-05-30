@@ -212,11 +212,18 @@ function Day({
       onPress={handlePress}
       disabled={!isDateValid(item.dateValue, challengesData![0].startDate)}
     >
-      <Text
-        className={item.isPadding ? "text-neutral-500" : "text-black font-bold"}
-      >
-        {getDate(item.dateValue)}
-      </Text>
+      <View className="flex flex-1 items-center justify-center">
+        <Text
+          className={
+            item.isPadding ? "text-neutral-500" : "text-black font-bold"
+          }
+        >
+          {getDate(item.dateValue)}
+        </Text>
+        <Text>
+          {item.dailyProgress?.completed ? challengesData![0].icon : null}
+        </Text>
+      </View>
     </Pressable>
   );
 }
