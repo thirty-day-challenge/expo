@@ -117,7 +117,7 @@ function Calendar() {
       data={gridData}
       renderItem={(item) => <Day {...item} />}
       numColumns={7}
-      className="bg-slate-400 p-[1px]"
+      className="p-[1px]"
     />
   );
 }
@@ -200,29 +200,30 @@ function Day({
 
   return (
     <Pressable
-      className={`m-[1px] flex-1 aspect-square ${
-        !isDateValid(item.dateValue, challengesData![0].startDate) &&
-        !item.isPadding
-          ? "bg-neutral-200"
-          : item.dailyProgress?.completed
-          ? "bg-green-500"
-          : "bg-white"
-      }`}
+      className={`flex-1 aspect-square`}
       key={index}
       onPress={handlePress}
       disabled={!isDateValid(item.dateValue, challengesData![0].startDate)}
     >
-      <View className="flex flex-1 items-center justify-center">
-        <Text
-          className={
-            item.isPadding ? "text-neutral-500" : "text-black font-bold"
-          }
+      <View className={`flex-1 p-1`}>
+        <View
+          className={`flex flex-1 items-center justify-center rounded-xl ${
+            item.dailyProgress?.completed ? "bg-neutral-200" : null
+          }`}
         >
-          {getDate(item.dateValue)}
-        </Text>
-        <Text>
-          {item.dailyProgress?.completed ? challengesData![0].icon : null}
-        </Text>
+          <Text
+            className={
+              isDateValid(item.dateValue, challengesData![0].startDate)
+                ? "text-black font-bold"
+                : "text-gray-400"
+            }
+          >
+            {!item.isPadding ? getDate(item.dateValue) : null}
+          </Text>
+          <Text>
+            {item.dailyProgress?.completed ? challengesData![0].icon : null}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );
