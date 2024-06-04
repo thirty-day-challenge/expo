@@ -80,20 +80,16 @@ function ChallengeInfo({ challenge }: { challenge: Challenge }) {
       <View className="gap-2">
         <View className="flex flex-row justify-between items-center">
           <Text className="text-xl font-bold tracking-tight">
-            Your Challenge:
+            {challenge.title}
           </Text>
           <EditChallengeButton challenge={challenge} />
         </View>
         <View className="gap-2">
-          <View>
-            <Text className="font-bold">Title:</Text>
-            <Text>{challenge.title}</Text>
-          </View>
-          <View>
+          <View className="flex flex-row gap-1">
             <Text className="font-bold">Wish:</Text>
             <Text>{challenge.wish}</Text>
           </View>
-          <View>
+          <View className="flex flex-row gap-1">
             <Text className="font-bold">Daily action:</Text>
             <Text>{challenge.dailyAction}</Text>
           </View>
@@ -119,6 +115,29 @@ function Calendar() {
       numColumns={7}
       className="p-[1px]"
     />
+  );
+}
+
+function StridePadding({
+  index,
+  item,
+}: {
+  index: number;
+  item: gridData[number];
+}) {
+  const isNotLeftEdge = index % 7 !== 0;
+  const isNotRightEdge = index % 7 !== 6;
+  const isCompleted = item.dailyProgress?.completed;
+
+  return (
+    <>
+      {isNotLeftEdge && isCompleted && item.leftCompleted ? (
+        <View className={`bg-neutral-200 absolute w-1/2 h-full left-0`}></View>
+      ) : null}
+      {isNotRightEdge && isCompleted && item.rightCompleted ? (
+        <View className={`bg-neutral-200 absolute w-1/2 h-full right-0`}></View>
+      ) : null}
+    </>
   );
 }
 
@@ -200,15 +219,16 @@ function Day({
 
   return (
     <Pressable
-      className={`flex-1 aspect-square`}
+      className={`flex-1 aspect-square flex flex-row`}
       key={index}
       onPress={handlePress}
       disabled={!isDateValid(item.dateValue, challengesData![0].startDate)}
     >
-      <View className={`flex-1 p-1`}>
+      <View className={`w-full my-[3px] relative`}>
+        <StridePadding index={index} item={item} />
         <View
-          className={`flex flex-1 items-center justify-center rounded-xl ${
-            item.dailyProgress?.completed ? "bg-neutral-200" : null
+          className={`flex flex-1 items-center justify-center mx-[3px] ${
+            item.dailyProgress?.completed ? "bg-neutral-200 rounded-xl" : null
           }`}
         >
           <Text

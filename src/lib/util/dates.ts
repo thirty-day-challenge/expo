@@ -19,12 +19,14 @@ export type gridData = {
   dateValue: Date;
   isPadding: boolean;
   dailyProgress: DailyProgress | undefined;
+  leftCompleted?: boolean;
+  rightCompleted?: boolean;
 }[];
 
 export const createCalendarDates = (
   challenge: z.infer<typeof ChallengeSchema>,
   dailyProgressData: z.infer<typeof DailyProgressSchema>[]
-) => {
+): gridData => {
   const dates = eachDayOfInterval({
     start: challenge.startDate,
     end: challenge.endDate,
@@ -70,6 +72,18 @@ export const createCalendarDates = (
       isPadding: true,
       dailyProgress: undefined,
     });
+  }
+
+  // After constructing the initial data, determine left and right completion status
+  for (let i = 0; i < gridData.length; i++) {
+    const current = gridData[i];
+    const previous = gridData[i - 1];
+    const next = gridData[i + 1];
+
+    current.leftCompleted = previous
+      ? !!previous.dailyProgress?.completed
+      : false;
+    current.rightCompleted = next ? !!next.dailyProgress?.completed : false;
   }
 
   return gridData;
