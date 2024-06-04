@@ -109,9 +109,31 @@ function Calendar() {
   const gridData = createCalendarDates(challenge, dailyProgressData);
 
   return (
+    <View className="gap-2">
+      <WeekDays />
+      <FlatList
+        data={gridData}
+        renderItem={(item) => <Day {...item} />}
+        numColumns={7}
+        className="p-[1px]"
+      />
+    </View>
+  );
+}
+
+function WeekDays() {
+  const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+
+  return (
     <FlatList
-      data={gridData}
-      renderItem={(item) => <Day {...item} />}
+      data={weekDays}
+      renderItem={(item) => (
+        <View className="flex-1 items-center justify-center">
+          <Text className="font-bold text-neutral-500 text-sm">
+            {item.item}
+          </Text>
+        </View>
+      )}
       numColumns={7}
       className="p-[1px]"
     />
