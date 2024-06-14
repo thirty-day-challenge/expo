@@ -6,7 +6,7 @@ import {
   ListRenderItemInfo,
 } from "react-native";
 import React from "react";
-import { ErrorBoundaryProps, Link, Redirect } from "expo-router";
+import { ErrorBoundaryProps, Link, Redirect, router } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { Challenge } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
@@ -243,7 +243,8 @@ function Day({
     <Pressable
       className={`flex-1 aspect-square flex flex-row`}
       key={index}
-      onPress={handlePress}
+      onPress={() => router.push(`/view-day/?date=${item.dateValue}`)}
+      onLongPress={handlePress}
       disabled={!isDateValid(item.dateValue, challengesData![0].startDate)}
     >
       <View className={`w-full my-[3px] relative`}>

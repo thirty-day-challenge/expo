@@ -9,32 +9,42 @@ import { useQuery } from "@tanstack/react-query";
 import ky from "ky";
 import { z } from "zod";
 
-const getChallenges = async (userId: string) => {
+const queryApiPost = async (route: string, json: any, schema: any) => {
   const response = await ky
-    .post(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/challenge/get`, {
-      json: { clerkId: userId },
+    .post(`${process.env.EXPO_PUBLIC_NEXTJS_URL}${route}`, {
+      json,
     })
     .json()
     .catch((e) => {
       console.error(e);
     });
 
-  const ResponseSchema = z.object({
-    message: z.string(),
-    data: ChallengeSchema.array(),
-  });
-
   try {
-    const validatedData = ResponseSchema.parse(response);
-    return validatedData.data;
+    const validatedData = schema.parse(response);
+    return validatedData;
   } catch (e) {
     console.error("Validation failed:", e);
     throw new Error("Validation failed");
   }
 };
 
-export type challenges = Challenge[];
+const getChallenges = async (userId: string) => {
+  const res = await queryApiPost(
+    "/api/challenge/get",
+    { clerkId: userId },
+    z.object({
+      message: z.string(),
+      data: ChallengeSchema.array(),
+    })
+  );
 
+  return res.data;
+};
+
+/**
+ * Custom hook for fetching challenges using React Query.
+ * @returns {useQuery} The React Query hook for fetching challenges.
+ */
 export const useChallenges = () => {
   const { userId, isLoaded } = useAuth();
 
@@ -52,32 +62,22 @@ export const useChallenges = () => {
     retry: false,
   });
 };
-
-export type daily_progress = DailyProgress[];
+export type challenges = Challenge[];
 
 const getDailyProgress = async (userId: string) => {
-  const response = await ky
-    .post(
-      `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/daily-progress/get-by-challenge`,
-      {
-        json: { clerkId: userId },
-        retry: 0,
-      }
-    )
-    .json()
-    .catch((e) => console.error(e));
+  const res = await queryApiPost(
+    "/api/daily-progress/get-by-challenge",
+    { clerkId: userId },
+    DailyProgressSchema.array()
+  );
 
-  const ResponseSchema = DailyProgressSchema.array();
-
-  try {
-    const validatedData = ResponseSchema.parse(response);
-    return validatedData;
-  } catch (e) {
-    console.error("Validation error:", e);
-    throw new Error("Validation error!");
-  }
+  return res;
 };
 
+/**
+ * Custom hook for fetching daily progress using React Query.
+ * @returns {useQuery} The React Query hook for fetching daily progress.
+ */
 export const useDailyProgress = () => {
   const { userId, isLoaded } = useAuth();
 
@@ -95,3 +95,4 @@ export const useDailyProgress = () => {
     retry: false,
   });
 };
+export type daily_progress = DailyProgress[];
