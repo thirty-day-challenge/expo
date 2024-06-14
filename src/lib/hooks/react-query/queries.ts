@@ -7,7 +7,7 @@ import {
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { queryApiPost } from "../../util/util";
+import { postApi } from "../../util/util";
 import { getChallenges } from "../../db/challenge";
 import { getDailyProgress } from "../../db/dailyProgress";
 

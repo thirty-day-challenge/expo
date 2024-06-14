@@ -1,16 +1,11 @@
 import { View, Text, Pressable, TextInput } from "react-native";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { EditChallengeSearchParams } from "@/app/(app)/challenge-forms/edit";
-import { ChallengeSchema } from "@30-day-challenge/prisma-zod";
-import ky from "ky";
-import { z } from "zod";
-import { router } from "expo-router";
-import { queryClient } from "@/lib/util/react-query";
-import { challenges } from "@/lib/hooks/react-query/queries";
 import { useAuth } from "@clerk/clerk-expo";
+import { useChallengeMutation } from "@/lib/hooks/react-query/mutations";
+import { ChallengeInput } from "@/lib/db/challenge";
 
 export type FormData = {
   title: string;
@@ -39,60 +34,22 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
     control,
   } = useForm<FormData>();
 
-  const { mutate } = useMutation({
-    mutationFn: handleFormSubmission,
-    onSuccess: (data) => {
-      queryClient.setQueryData(["challenges"], (oldData: challenges) => {
-        if (searchParams)
-          return oldData.map((challenge) => {
-            if (challenge.id === searchParams.id) {
-              return data;
-            }
-            return challenge;
-          });
-
-        return [...oldData, data];
-      });
-      router.push("/");
-    },
-  });
+  const { mutate } = useChallengeMutation(searchParams);
 
   async function handleFormSubmission(data: FormData) {
     const { title, wish, dailyAction, icon } = data;
 
-    const challengeInput = {
+    const challengeInput: ChallengeInput = {
       title,
       wish,
       dailyAction,
       icon,
-      ...(searchParams ? { id: searchParams.id } : { clerkId: userId }),
+      ...(searchParams && searchParams.id
+        ? { id: searchParams.id }
+        : { clerkId: userId! }),
     };
 
-    const response = await ky
-      .put(
-        `${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/challenge/${
-          searchParams ? "update" : "create"
-        }`,
-        {
-          json: challengeInput,
-        }
-      )
-      .json()
-      .catch((e) => {
-        throw new Error(`Challenge failed to be updated: ${e}`);
-      });
-
-    const ResponseSchema = z.object({
-      message: z.string(),
-      data: ChallengeSchema,
-    });
-
-    try {
-      const { data } = ResponseSchema.parse(response);
-      return data;
-    } catch (error) {
-      throw new Error("Validation failed: " + error);
-    }
+    return mutate(challengeInput);
   }
 
   const validateEmoji = (emojiString: string) => {
@@ -223,7 +180,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
       </View>
       <Pressable
         className="px-3 py-2 bg-blue-500 mr-auto rounded-lg"
-        onPress={handleSubmit((data) => mutate(data))}
+        onPress={handleSubmit((data) => handleFormSubmission(data))}
       >
         <Text className="text-white">Submit</Text>
       </Pressable>

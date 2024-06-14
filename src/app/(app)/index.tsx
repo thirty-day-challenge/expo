@@ -26,6 +26,11 @@ import {
 import { z } from "zod";
 import ky from "ky";
 import { Pencil } from "lucide-react-native";
+import {
+  DailyProgressInput,
+  upsertDailyProgress,
+} from "@/lib/db/dailyProgress";
+import { useDailyProgressMutation } from "@/lib/hooks/react-query/mutations";
 
 export function ErrorBoundary(props: ErrorBoundaryProps) {
   return (
@@ -171,64 +176,10 @@ function Day({
   const { data: challengesData } = useChallenges();
   const { userId } = useAuth();
 
-  const { mutate } = useMutation({
-    mutationFn: mutateDailyProgress,
-    onMutate: async (data) => {
-      await queryClient.cancelQueries({ queryKey: ["daily-progress"] });
-      const previousDailyProgress = queryClient.getQueryData([
-        "daily-progress",
-      ]);
-      queryClient.setQueryData(
-        ["daily-progress"],
-        (oldData: daily_progress) => [...oldData, data]
-      );
-
-      return { previousDailyProgress };
-    },
-    onError: (err, data, context) => {
-      queryClient.setQueryData(
-        ["daily-progress"],
-        context?.previousDailyProgress
-      );
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["daily-progress"] });
-    },
-  });
-
-  type reqBody = Omit<DailyProgressOptionalDefaults, "userId"> & {
-    clerkId: string;
-  };
-  async function mutateDailyProgress(reqBody: reqBody) {
-    const response = await ky
-      .put(`${process.env.EXPO_PUBLIC_NEXTJS_URL}/api/daily-progress/modify`, {
-        json: reqBody,
-        retry: 0,
-      })
-      .json()
-      .catch((e) =>
-        console.error(
-          "Something went wrong when modifying progress completion:",
-          e
-        )
-      );
-
-    const ResponseSchema = z.object({
-      message: z.string(),
-      data: DailyProgressSchema,
-    });
-
-    try {
-      const { data } = ResponseSchema.parse(response);
-      return data;
-    } catch (error) {
-      console.error("Validation failed:", error);
-      throw new Error();
-    }
-  }
+  const { mutate } = useDailyProgressMutation();
 
   function handlePress() {
-    const reqBody: reqBody = {
+    const dailyProgressInput: DailyProgressInput = {
       id: item.dailyProgress?.id || undefined,
       clerkId: userId!,
       date: item.dateValue,
@@ -236,7 +187,7 @@ function Day({
       challengeId: challengesData![0].id,
     };
 
-    mutate(reqBody);
+    mutate(dailyProgressInput);
   }
 
   return (
