@@ -14,7 +14,7 @@ import {
   daily_progress,
   useChallenges,
   useDailyProgress,
-} from "@/lib/hooks/react-query";
+} from "@/lib/hooks/react-query/queries";
 import { queryClient } from "@/lib/util/react-query";
 import SafeView from "@/components/SafeView";
 import { getDate } from "date-fns";

@@ -6,45 +6,11 @@ import {
 } from "@30-day-challenge/prisma-zod";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
-import ky from "ky";
 import { z } from "zod";
+import { queryApiPost } from "../../util/util";
+import { getChallenges } from "../../db/challenge";
+import { getDailyProgress } from "../../db/dailyProgress";
 
-const queryApiPost = async (route: string, json: any, schema: any) => {
-  const response = await ky
-    .post(`${process.env.EXPO_PUBLIC_NEXTJS_URL}${route}`, {
-      json,
-    })
-    .json()
-    .catch((e) => {
-      console.error(e);
-    });
-
-  try {
-    const validatedData = schema.parse(response);
-    return validatedData;
-  } catch (e) {
-    console.error("Validation failed:", e);
-    throw new Error("Validation failed");
-  }
-};
-
-const getChallenges = async (userId: string) => {
-  const res = await queryApiPost(
-    "/api/challenge/get",
-    { clerkId: userId },
-    z.object({
-      message: z.string(),
-      data: ChallengeSchema.array(),
-    })
-  );
-
-  return res.data;
-};
-
-/**
- * Custom hook for fetching challenges using React Query.
- * @returns {useQuery} The React Query hook for fetching challenges.
- */
 export const useChallenges = () => {
   const { userId, isLoaded } = useAuth();
 
@@ -63,16 +29,6 @@ export const useChallenges = () => {
   });
 };
 export type challenges = Challenge[];
-
-const getDailyProgress = async (userId: string) => {
-  const res = await queryApiPost(
-    "/api/daily-progress/get-by-challenge",
-    { clerkId: userId },
-    DailyProgressSchema.array()
-  );
-
-  return res;
-};
 
 /**
  * Custom hook for fetching daily progress using React Query.

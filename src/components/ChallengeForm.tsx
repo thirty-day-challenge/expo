@@ -9,7 +9,7 @@ import ky from "ky";
 import { z } from "zod";
 import { router } from "expo-router";
 import { queryClient } from "@/lib/util/react-query";
-import { challenges } from "@/lib/hooks/react-query";
+import { challenges } from "@/lib/hooks/react-query/queries";
 import { useAuth } from "@clerk/clerk-expo";
 
 export type FormData = {

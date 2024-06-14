@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
 import { Redirect } from "expo-router";
-import { useChallenges } from "@/lib/hooks/react-query";
+import { useChallenges } from "@/lib/hooks/react-query/queries";
 import { ChallengeForm } from "@/components/ChallengeForm";
 
 export default function NewChallengeForm() {
