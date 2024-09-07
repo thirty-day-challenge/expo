@@ -1,8 +1,10 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import React from "react";
-import { ArrowLeftFromLine } from "lucide-react-native";
+import { ArrowLeftFromLine, Camera } from "lucide-react-native";
 import { Link, Redirect, router, useLocalSearchParams } from "expo-router";
 import { z } from "zod";
+import { useAtom } from "jotai";
+import { imageAtom } from "@/lib/atoms";
 
 export type ViewDaySearchParams = {
   date: string;
@@ -26,7 +28,13 @@ const ViewDay = () => {
     return <Redirect href={"/"} />;
   }
 
-  const date = new Date(searchParams.date);
+  const [image, setImage] = useAtom(imageAtom);
+
+  const takeProgressPicture = () => {
+    setImage(undefined);
+
+    router.push("/progress-picture-camera");
+  };
 
   return (
     <>
@@ -36,9 +44,21 @@ const ViewDay = () => {
         </Pressable>
       </Link>
       <View className="flex items-center justify-center flex-1">
-        <Text className="text-xl font-bold">
-          Date: {date.toLocaleDateString()}
-        </Text>
+        <Pressable
+          className="rounded-md p-2 border-2"
+          onPress={takeProgressPicture}
+        >
+          <Camera size={24} color="black" />
+        </Pressable>
+        {image ? (
+          <View>
+            <Image
+              src={image.uri}
+              alt="hi"
+              style={{ width: image.width, height: 200 }}
+            />
+          </View>
+        ) : null}
       </View>
     </>
   );
