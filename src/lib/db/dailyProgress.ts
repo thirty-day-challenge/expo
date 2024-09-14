@@ -39,3 +39,18 @@ export const upsertDailyProgress = async (reqBody: DailyProgressInput) => {
 
   return response;
 };
+
+export const uploadImage = async (base64: string) => {
+  const ResponseSchema = z.object({
+    url: z.string(),
+  });
+  type ResponseSchema = z.infer<typeof ResponseSchema>;
+
+  const response: ResponseSchema = await postApi(
+    "/api/daily-progress/upload-image",
+    { base64 },
+    ResponseSchema
+  );
+
+  return response.url;
+};
