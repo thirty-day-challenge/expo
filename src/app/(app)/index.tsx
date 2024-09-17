@@ -194,7 +194,11 @@ function Day({
     <Pressable
       className={`flex-1 aspect-square flex flex-row`}
       key={index}
-      onPress={() => router.push(`/view-day/?date=${item.dateValue}`)}
+      onPress={() =>
+        router.push(
+          `/view-day/?date=${item.dateValue}&id=${item.dailyProgress?.id}`
+        )
+      }
       onLongPress={handlePress}
       disabled={!isDateValid(item.dateValue, challengesData![0].startDate)}
     >

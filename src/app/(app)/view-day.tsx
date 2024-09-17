@@ -1,14 +1,18 @@
 import { View, Text, Pressable, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowLeftFromLine } from "lucide-react-native";
 import { Link, Redirect, router, useLocalSearchParams } from "expo-router";
 import { z } from "zod";
 import * as ImagePicker from "expo-image-picker";
-import RNFS from "react-native-fs";
 import { uploadImage, upsertDailyProgress } from "@/lib/db/dailyProgress";
+import { useDailyProgress } from "@/lib/hooks/react-query/queries";
+import { useAuth } from "@clerk/clerk-expo";
+import { convertToBase64 } from "@/lib/util/util";
+import { useDailyProgressMutation } from "@/lib/hooks/react-query/mutations";
 
 export type ViewDaySearchParams = {
   date: string;
+  id: string;
 };
 
 const dateSchema = z.string().refine(
@@ -22,52 +26,10 @@ const dateSchema = z.string().refine(
   }
 );
 
-const convertToBase64 = async (imageUri: string) => {
-  try {
-    // Determine the MIME type based on the file extension
-    let mimeType = "";
-
-    if (imageUri.endsWith(".jpg") || imageUri.endsWith(".jpeg")) {
-      mimeType = "image/jpeg";
-    } else if (imageUri.endsWith(".png")) {
-      mimeType = "image/png";
-    } else if (imageUri.endsWith(".gif")) {
-      mimeType = "image/gif";
-    } else if (imageUri.endsWith(".bmp")) {
-      mimeType = "image/bmp";
-    } else if (imageUri.endsWith(".webp")) {
-      mimeType = "image/webp";
-    } else {
-      throw new Error("Unsupported image type");
-    }
-
-    // Read the image file and convert it to a Base64 string
-    const base64String = await RNFS.readFile(imageUri, "base64");
-
-    // Create the full Base64 image string with the appropriate data URI prefix
-    const base64Image = `data:${mimeType};base64,${base64String}`;
-
-    // Return the complete Base64 image string
-    return base64Image;
-  } catch (error) {
-    console.error("Error converting image to base64:", error);
-    throw error; // Re-throw the error if you need to handle it elsewhere
-  }
-};
-
-const ViewDay = () => {
-  const searchParams = useLocalSearchParams<ViewDaySearchParams>();
-
-  if (!searchParams.date || !dateSchema.safeParse(searchParams.date).success) {
-    return <Redirect href={"/"} />;
-  }
-
-  const date = new Date(searchParams.date);
-
+const useImagePicker = () => {
   const [image, setImage] = useState<string | null>(null);
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -83,6 +45,35 @@ const ViewDay = () => {
     setImage(null);
   };
 
+  return { image, setImage, pickImage, removeImage };
+};
+
+const ViewDay = () => {
+  const searchParams = useLocalSearchParams<ViewDaySearchParams>();
+  const { userId } = useAuth();
+
+  if (!searchParams.date || !dateSchema.safeParse(searchParams.date).success) {
+    return <Redirect href={"/"} />;
+  }
+
+  const { mutate } = useDailyProgressMutation();
+
+  const { data: dailyProgressData } = useDailyProgress();
+
+  if (!dailyProgressData) return <Text>Loading...</Text>;
+
+  const dailyProgress = dailyProgressData.find(
+    (dp) => dp.id === searchParams.id
+  );
+
+  const date = new Date(searchParams.date);
+
+  const { image, setImage, pickImage, removeImage } = useImagePicker();
+
+  useEffect(() => {
+    if (dailyProgress) setImage(dailyProgress.imageUrl);
+  }, []);
+
   const saveChanges = async () => {
     if (!image) return;
 
@@ -92,9 +83,18 @@ const ViewDay = () => {
 
     const url = await uploadImage(base64);
 
-    // await upsertDailyProgress({
-    //   imageUrl: url,
-    // })
+    if (!dailyProgress) return;
+
+    mutate({
+      id: searchParams.id,
+      imageUrl: url,
+      challengeId: dailyProgress?.challengeId,
+      date: dailyProgress?.date,
+      completed: dailyProgress?.completed,
+      clerkId: userId!,
+    });
+
+    router.back();
   };
 
   return (
