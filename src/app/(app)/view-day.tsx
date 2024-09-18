@@ -1,7 +1,10 @@
 import { imageAtom } from "@/lib/db/atoms";
-import { uploadImage } from "@/lib/db/dailyProgress";
+import { DailyProgressInput, uploadImage } from "@/lib/db/dailyProgress";
 import { useDailyProgressMutation } from "@/lib/hooks/react-query/mutations";
-import { useDailyProgress } from "@/lib/hooks/react-query/queries";
+import {
+  useChallenges,
+  useDailyProgress,
+} from "@/lib/hooks/react-query/queries";
 import { convertToBase64 } from "@/lib/util/util";
 import { useAuth } from "@clerk/clerk-expo";
 import * as ImagePicker from "expo-image-picker";
@@ -93,51 +96,65 @@ const DailyImage = () => {
 const ViewDay = () => {
   const searchParams = useLocalSearchParams<ViewDaySearchParams>();
 
-  if (!searchParams.date || !dateSchema.safeParse(searchParams.date).success) {
+  const { userId } = useAuth();
+  const { mutate } = useDailyProgressMutation();
+  const { data: dailyProgressData } = useDailyProgress();
+  const { image, setImage } = useImagePicker();
+  const {
+    data: challengesData,
+    error,
+    isLoading: isChallengesLoading,
+  } = useChallenges();
+
+  if (
+    !searchParams.date ||
+    !dateSchema.safeParse(searchParams.date).success ||
+    error ||
+    (!challengesData && !isChallengesLoading)
+  ) {
     return <Redirect href={"/"} />;
   }
 
   const date = new Date(searchParams.date);
 
-  const { userId } = useAuth();
-  const { mutate } = useDailyProgressMutation();
-  const { data: dailyProgressData } = useDailyProgress();
-  const { image, setImage } = useImagePicker();
-
   const dailyProgress = dailyProgressData?.find(
     (dp) => dp.id === searchParams.id
   );
-  if (!dailyProgressData || !dailyProgress) {
-    router.back();
-    return;
-  }
 
   useEffect(() => {
     if (dailyProgress) setImage(dailyProgress.imageUrl);
   }, []);
 
   const saveChanges = async () => {
-    if (!image || image === dailyProgress!.imageUrl) {
-      router.back();
+    if (isChallengesLoading) {
       return;
     }
 
-    const base64 = await convertToBase64(image!);
+    console.log("in the s");
 
-    if (!base64) return;
+    let url;
+    if (image && (!dailyProgress || image !== dailyProgress.imageUrl)) {
+      const base64 = await convertToBase64(image!);
 
-    const url = await uploadImage(base64);
+      if (!base64) return;
 
-    if (!dailyProgress) return;
+      url = await uploadImage(base64);
+    }
 
-    mutate({
+    const mutationInput: DailyProgressInput = {
       id: searchParams.id,
       imageUrl: url,
-      challengeId: dailyProgress?.challengeId,
-      date: dailyProgress?.date,
-      completed: dailyProgress?.completed,
+      challengeId: challengesData![0].id,
+      date: date,
+      completed: dailyProgress?.completed || false,
       clerkId: userId!,
-    });
+    };
+
+    if (dailyProgress?.imageUrl === mutationInput.imageUrl) {
+      console.log("no changes have been made");
+    }
+
+    mutate(mutationInput);
 
     router.back();
   };
