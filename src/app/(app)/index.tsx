@@ -1,36 +1,24 @@
+import SafeView from "@/components/SafeView";
+import { DailyProgressInput } from "@/lib/db/dailyProgress";
+import { useDailyProgressMutation } from "@/lib/hooks/react-query/mutations";
 import {
-  View,
-  Text,
-  Pressable,
-  FlatList,
-  ListRenderItemInfo,
-} from "react-native";
-import React from "react";
-import { ErrorBoundaryProps, Link, Redirect, router } from "expo-router";
-import { useAuth } from "@clerk/clerk-expo";
-import { Challenge } from "@prisma/client";
-import { useMutation } from "@tanstack/react-query";
-import {
-  daily_progress,
   useChallenges,
   useDailyProgress,
 } from "@/lib/hooks/react-query/queries";
-import { queryClient } from "@/lib/util/react-query";
-import SafeView from "@/components/SafeView";
-import { getDate } from "date-fns";
 import { createCalendarDates, gridData, isDateValid } from "@/lib/util/dates";
+import { useAuth } from "@clerk/clerk-expo";
+import { Challenge } from "@prisma/client";
+import { getDate } from "date-fns";
+import { ErrorBoundaryProps, Link, Redirect, router } from "expo-router";
+import { Pencil, Notebook } from "lucide-react-native";
+import React from "react";
 import {
-  DailyProgressOptionalDefaults,
-  DailyProgressSchema,
-} from "@30-day-challenge/prisma-zod";
-import { z } from "zod";
-import ky from "ky";
-import { Pencil } from "lucide-react-native";
-import {
-  DailyProgressInput,
-  upsertDailyProgress,
-} from "@/lib/db/dailyProgress";
-import { useDailyProgressMutation } from "@/lib/hooks/react-query/mutations";
+  FlatList,
+  ListRenderItemInfo,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 
 export function ErrorBoundary(props: ErrorBoundaryProps) {
   return (
@@ -51,6 +39,7 @@ export default function Page() {
     isLoading: isChallengesLoading,
   } = useChallenges();
   const { isLoading: isDailyProgressDataLoading } = useDailyProgress();
+  const { data: dailyProgressData } = useDailyProgress();
 
   if (isChallengesLoading || isDailyProgressDataLoading)
     return <Text>Challenges data is loading...</Text>;
@@ -58,10 +47,15 @@ export default function Page() {
   if (!challengesData || challengesData.length === 0)
     return <Redirect href={"/challenge-forms/create"} />;
 
+  if (dailyProgressData == undefined) throw new Error();
+
+  const challenge = challengesData![0];
+  const gridData = createCalendarDates(challenge, dailyProgressData);
+
   return (
     <View className="w-5/6 mx-auto gap-5">
-      <ChallengeInfo challenge={challengesData[0]} />
-      <Calendar />
+      <ChallengeInfo challenge={challengesData[0]} gridData={gridData} />
+      <Calendar gridData={gridData} />
     </View>
   );
 }
@@ -79,7 +73,48 @@ function EditChallengeButton({ challenge }: { challenge: Challenge }) {
   );
 }
 
-function ChallengeInfo({ challenge }: { challenge: Challenge }) {
+function NoteButton({ challenge }: { challenge: Challenge }) {
+  return (
+    <Link href={`/challenge-forms/note/?id=${challenge.id}`} asChild>
+      <Pressable className="bg-neutral-200 p-1.5 rounded-lg">
+        <Notebook size={20} color={"black"} />
+      </Pressable>
+    </Link>
+  );
+}
+
+function CompletionDisplay({ gridData }: { gridData: gridData }) {
+  let totalCount = 0;
+  let completedCount = 0;
+  gridData.forEach((item) => {
+    if (item.dailyProgress?.completed) completedCount++;
+    if (!item.isPadding && new Date() > item.dateValue) totalCount++;
+  });
+
+  const percentage = Math.round((completedCount / totalCount) * 100);
+
+  return (
+    <Pressable className="bg-neutral-200 p-1.5 rounded-lg">
+      {() => {
+        if (percentage > 75) {
+          return <Text>✅</Text>;
+        }
+        if (percentage > 25) {
+          return <Text>🏃‍♀️</Text>;
+        }
+        return <Text>😴</Text>;
+      }}
+    </Pressable>
+  );
+}
+
+function ChallengeInfo({
+  challenge,
+  gridData,
+}: {
+  challenge: Challenge;
+  gridData: gridData;
+}) {
   return (
     <View className="gap-5">
       <View className="gap-2">
@@ -87,7 +122,11 @@ function ChallengeInfo({ challenge }: { challenge: Challenge }) {
           <Text className="text-xl font-bold tracking-tight">
             {challenge.title}
           </Text>
-          <EditChallengeButton challenge={challenge} />
+          <View className="flex gap-2 flex-row-reverse">
+            <EditChallengeButton challenge={challenge} />
+            <NoteButton challenge={challenge} />
+            <CompletionDisplay gridData={gridData} />
+          </View>
         </View>
         <View className="gap-2">
           <View className="flex flex-row gap-1">
@@ -104,15 +143,7 @@ function ChallengeInfo({ challenge }: { challenge: Challenge }) {
   );
 }
 
-function Calendar() {
-  const { data: challengesData } = useChallenges();
-  const { data: dailyProgressData } = useDailyProgress();
-
-  if (dailyProgressData == undefined) throw new Error();
-
-  const challenge = challengesData![0];
-  const gridData = createCalendarDates(challenge, dailyProgressData);
-
+function Calendar({ gridData }: { gridData: gridData }) {
   return (
     <View className="gap-2">
       <WeekDays />

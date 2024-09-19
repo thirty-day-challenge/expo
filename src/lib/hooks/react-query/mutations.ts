@@ -6,18 +6,16 @@ import { challenges, daily_progress } from "./queries";
 import { EditChallengeSearchParams } from "@/app/(app)/challenge-forms/edit";
 import { upsertDailyProgress } from "@/lib/db/dailyProgress";
 
-export const useChallengeMutation = (
-  searchParams: Partial<EditChallengeSearchParams> | undefined
-) => {
+export const useChallengeMutation = (id: string | undefined) => {
   return useMutation({
     mutationFn: async (challengeInput: ChallengeInput) => {
       return await upsertChallenge(challengeInput);
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["challenges"], (oldData: challenges) => {
-        if (searchParams)
+        if (id)
           return oldData.map((challenge) => {
-            if (challenge.id === searchParams.id) {
+            if (challenge.id === id) {
               return data;
             }
             return challenge;

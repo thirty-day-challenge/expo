@@ -20,10 +20,11 @@ export type ChallengeFormProps = {
 export function ChallengeForm({ searchParams }: ChallengeFormProps) {
   const {
     id = undefined,
-    title = undefined,
-    wish = undefined,
-    dailyAction = undefined,
-    icon = undefined,
+    title = null,
+    wish = null,
+    dailyAction = null,
+    icon = null,
+    note = null,
   } = searchParams || {};
 
   const { userId } = useAuth();
@@ -34,7 +35,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
     control,
   } = useForm<FormData>();
 
-  const { mutate } = useChallengeMutation(searchParams);
+  const { mutate } = useChallengeMutation(id);
 
   async function handleFormSubmission(data: FormData) {
     const { title, wish, dailyAction, icon } = data;
@@ -44,6 +45,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
       wish,
       dailyAction,
       icon,
+      note: note,
       ...(searchParams && searchParams.id
         ? { id: searchParams.id }
         : { clerkId: userId! }),

@@ -10,6 +10,7 @@ export type EditChallengeSearchParams = {
   wish: string;
   dailyAction: string;
   icon: string;
+  note: string;
 };
 
 export default function EditChallenge() {
