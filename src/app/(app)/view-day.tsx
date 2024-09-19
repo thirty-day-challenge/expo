@@ -130,8 +130,6 @@ const ViewDay = () => {
       return;
     }
 
-    console.log("in the s");
-
     let url;
     if (image && (!dailyProgress || image !== dailyProgress.imageUrl)) {
       const base64 = await convertToBase64(image!);
