@@ -1,9 +1,9 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
 import "@/global.css";
+import { queryClient } from "@/lib/util/react-query";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Slot } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/util/react-query";
 
 const tokenCache = {
   async getToken(key: string) {

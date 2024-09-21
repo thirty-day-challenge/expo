@@ -1,7 +1,7 @@
-import { View, Text } from "react-native";
-import React from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cn } from "@/lib/util/util";
+import React from "react";
+import { Dimensions, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type SafeViewProps = {
   top?: boolean;
@@ -26,6 +26,7 @@ export default function SafeView({
     left: leftPadding,
     bottom: bottomPadding,
   } = useSafeAreaInsets();
+  const windowHeight = Dimensions.get("window").height;
 
   return (
     <View
@@ -34,6 +35,7 @@ export default function SafeView({
         paddingRight: right ? rightPadding : 0,
         paddingBottom: bottom ? bottomPadding : 0,
         paddingLeft: left ? leftPadding : 0,
+        maxHeight: windowHeight,
       }}
       className={cn("flex-1 relative", className)}
     >

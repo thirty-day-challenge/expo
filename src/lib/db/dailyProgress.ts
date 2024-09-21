@@ -54,3 +54,18 @@ export const uploadImage = async (base64: string) => {
 
   return response.url;
 };
+
+export const deleteImage = async (url: string) => {
+  const ResponseSchema = z.object({
+    message: z.string(),
+  });
+  type ResponseSchema = z.infer<typeof ResponseSchema>;
+
+  const response: ResponseSchema = await postApi(
+    "/api/daily-progress/delete-image",
+    { url },
+    ResponseSchema
+  );
+
+  return response;
+};

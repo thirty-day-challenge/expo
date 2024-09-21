@@ -1,5 +1,9 @@
 import { imageAtom } from "@/lib/db/atoms";
-import { DailyProgressInput, uploadImage } from "@/lib/db/dailyProgress";
+import {
+  DailyProgressInput,
+  deleteImage,
+  uploadImage,
+} from "@/lib/db/dailyProgress";
 import { useDailyProgressMutation } from "@/lib/hooks/react-query/mutations";
 import {
   useChallenges,
@@ -125,20 +129,7 @@ const ViewDay = () => {
     if (dailyProgress) setImage(dailyProgress.imageUrl);
   }, []);
 
-  const saveChanges = async () => {
-    if (isChallengesLoading) {
-      return;
-    }
-
-    let url;
-    if (image && (!dailyProgress || image !== dailyProgress.imageUrl)) {
-      const base64 = await convertToBase64(image!);
-
-      if (!base64) return;
-
-      url = await uploadImage(base64);
-    }
-
+  const handleMutation = async (url?: string) => {
     const mutationInput: DailyProgressInput = {
       id: searchParams.id,
       imageUrl: url,
@@ -149,10 +140,33 @@ const ViewDay = () => {
     };
 
     if (dailyProgress?.imageUrl === mutationInput.imageUrl) {
-      console.log("no changes have been made");
+      // return;
     }
 
     mutate(mutationInput);
+  };
+
+  const saveChanges = async () => {
+    if (isChallengesLoading) {
+      return;
+    }
+
+    if (dailyProgress?.imageUrl && dailyProgress?.imageUrl !== image) {
+      await deleteImage(dailyProgress.imageUrl);
+    }
+
+    let url = "";
+    if (image === dailyProgress?.imageUrl) {
+      url = image;
+    } else if (image && (!dailyProgress || image !== dailyProgress.imageUrl)) {
+      const base64 = await convertToBase64(image!);
+
+      if (!base64) return;
+
+      url = await uploadImage(base64);
+    }
+
+    handleMutation(url);
 
     router.back();
   };

@@ -18,7 +18,7 @@ export default function AppLayout() {
   if (!isSignedIn) return <Redirect href={"/sign-in"} />;
 
   return (
-    <SafeView top bottom>
+    <SafeView top>
       <Slot />
     </SafeView>
   );
