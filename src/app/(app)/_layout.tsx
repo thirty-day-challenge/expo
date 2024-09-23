@@ -1,7 +1,7 @@
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import "@/global.css";
 import { Redirect, Slot } from "expo-router";
-import { Text, View } from "react-native";
+import { SafeAreaView, Text, View } from "react-native";
 import { useEffect } from "react";
 import SafeView from "@/components/SafeView";
 

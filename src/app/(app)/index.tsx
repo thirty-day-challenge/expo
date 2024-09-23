@@ -61,7 +61,6 @@ export default function Page() {
         <Calendar gridData={gridData} />
       </View>
       <ScrollView className="w-full">
-        {isDailyProgressDataLoading && <Text>HOLY SHIT WE'RE LOADING</Text>}
         <View className="w-5/6 mx-auto">
           <ImageList dailyProgressData={dailyProgressData} />
         </View>

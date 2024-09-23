@@ -23,6 +23,7 @@ export default function Calendar({ gridData }: { gridData: gridData }) {
         renderItem={(item) => <Day {...item} />}
         numColumns={7}
         className="p-[1px]"
+        scrollEnabled={false}
       />
     </View>
   );
@@ -43,6 +44,7 @@ function WeekDays() {
       )}
       numColumns={7}
       className="p-[1px]"
+      scrollEnabled={false}
     />
   );
 }

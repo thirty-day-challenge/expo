@@ -1,6 +1,6 @@
 import { ClassValue, clsx } from "clsx";
 import ky from "ky";
-import RNFS from "react-native-fs";
+import * as FileSystem from "expo-file-system";
 import { twMerge } from "tailwind-merge";
 import { ZodType } from "zod";
 
@@ -69,10 +69,12 @@ export const convertToBase64 = async (imageUri: string) => {
     }
 
     // Read the image file and convert it to a Base64 string
-    const base64String = await RNFS.readFile(imageUri, "base64");
+    const blob = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
     // Create the full Base64 image string with the appropriate data URI prefix
-    const base64Image = `data:${mimeType};base64,${base64String}`;
+    const base64Image = `data:${mimeType};base64,${blob}`;
 
     // Return the complete Base64 image string
     return base64Image;
