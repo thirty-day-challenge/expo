@@ -1,6 +1,6 @@
 import { cn } from "@/lib/util/util";
 import React from "react";
-import { Dimensions, SafeAreaView, View } from "react-native";
+import { Dimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type SafeViewProps = {
@@ -28,5 +28,18 @@ export default function SafeView({
   } = useSafeAreaInsets();
   const windowHeight = Dimensions.get("window").height;
 
-  return <SafeAreaView className="flex-1">{children}</SafeAreaView>;
+  return (
+    <View
+      style={{
+        paddingTop: top ? topPadding : 0,
+        paddingRight: right ? rightPadding : 0,
+        paddingBottom: bottom ? bottomPadding : 0,
+        paddingLeft: left ? leftPadding : 0,
+        maxHeight: windowHeight,
+      }}
+      className={cn("flex-1 relative", className)}
+    >
+      {children}
+    </View>
+  );
 }
