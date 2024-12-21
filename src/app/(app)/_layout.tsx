@@ -1,9 +1,8 @@
-import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
-import "@/global.css";
-import { Redirect, Slot } from "expo-router";
-import { Text, View } from "react-native";
-import { useEffect } from "react";
 import SafeView from "@/components/SafeView";
+import "@/global.css";
+import { useAuth } from "@clerk/clerk-expo";
+import { Redirect, Slot } from "expo-router";
+import { Text } from "react-native";
 
 export default function AppLayout() {
   const { isSignedIn, isLoaded } = useAuth();

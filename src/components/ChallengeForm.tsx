@@ -83,6 +83,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
+                    className="ios:py-1"
                   />
                 </View>
               )}
@@ -111,6 +112,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
+                    className="ios:py-1"
                   />
                 </View>
               )}
@@ -139,6 +141,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
+                    className="ios:py-1"
                   />
                 </View>
               )}
@@ -168,6 +171,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
+                    className="ios:py-1"
                   />
                 </View>
               )}
@@ -180,6 +184,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
           </View>
         </View>
       </View>
+
       <Pressable
         className="px-3 py-2 bg-blue-500 mr-auto rounded-lg"
         onPress={handleSubmit((data) => handleFormSubmission(data))}

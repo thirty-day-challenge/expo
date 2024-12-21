@@ -172,12 +172,13 @@ const ViewDay = () => {
   };
 
   return (
-    <>
-      <Link href={"/"} asChild>
-        <Pressable className="bg-black rounded-md p-2 absolute top-14 left-10">
-          <ArrowLeftFromLine size={20} color="white" />
-        </Pressable>
-      </Link>
+    <View className="flex-1">
+      <Pressable
+        className="bg-black rounded-md p-2 absolute left-10 z-10"
+        onPress={() => router.back()}
+      >
+        <ArrowLeftFromLine size={20} color="white" />
+      </Pressable>
       <View className="flex items-center justify-center flex-1 px-10 gap-8">
         <Text className="text-xl font-bold">
           Date: {date.toLocaleDateString()}
@@ -190,7 +191,7 @@ const ViewDay = () => {
           <Text className="text-white">Save Changes</Text>
         </Pressable>
       </View>
-    </>
+    </View>
   );
 };
 

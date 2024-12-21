@@ -1,6 +1,6 @@
 import { gridData } from "@/lib/util/dates";
 import { Challenge } from "@prisma/client";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Notebook, Pencil } from "lucide-react-native";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -74,7 +74,10 @@ function CompletionDisplay({ gridData }: { gridData: gridData }) {
   const percentage = Math.round((completedCount / totalCount) * 100);
 
   return (
-    <Pressable className="bg-neutral-200 p-1.5 rounded-lg">
+    <Pressable
+      className="bg-neutral-200 p-1.5 rounded-lg"
+      onPress={() => router.push("/tabs")}
+    >
       {() => {
         if (percentage > 75) {
           return <Text>✅</Text>;
