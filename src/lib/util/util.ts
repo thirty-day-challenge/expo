@@ -14,13 +14,16 @@ const apiRequest = async (
   json: any,
   schema: ZodType<any, any, any>
 ) => {
-  const url = `${process.env.EXPO_PUBLIC_NEXTJS_URL}${route}`;
+  const url = `${process.env.EXPO_PUBLIC_NEXTJS_URL}${route}`; 
 
   const response = await ky[method](url, { json })
     .json()
     .catch((e) => {
       console.error(e);
     });
+
+    console.log(response);
+    
 
   try {
     const parsedData = schema.safeParse(response);
