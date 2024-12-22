@@ -20,13 +20,12 @@ const apiRequest = async (
     .json()
     .catch((e) => {
       console.error(e);
-    });
-
-    console.log(response);
-    
+    });    
 
   try {
     const parsedData = schema.safeParse(response);
+    console.log(parsedData);
+    
     if (parsedData.error) throw new Error("Validation failed, route: " + route);
     const validatedData = parsedData.data;
     return validatedData;
