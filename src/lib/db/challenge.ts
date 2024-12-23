@@ -7,20 +7,6 @@ import { postApi, putApi } from "../util/util";
 import { z } from "zod";
 
 export const getChallenges = async (userId: string) => {
-  const ChallengeSchema = z.object({
-    id: z.string(),
-    title: z.string(),
-    wish: z.string(),
-    dailyAction: z.string(),
-    icon: z.string(),
-    note: z.string().nullable().optional(),
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
-    createdAt: z.coerce.date(),
-    updatedAt: z.coerce.date(),
-    userId: z.string(),
-  })
-
   const Schema = z.object({
     message: z.string(),
     data: ChallengeSchema.array(),
