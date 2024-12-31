@@ -14,7 +14,13 @@ import {
   View,
 } from "react-native";
 
-export default function Calendar({ gridData }: { gridData: gridData }) {
+export default function Calendar({
+  gridData,
+  challengeId,
+}: {
+  gridData: gridData;
+  challengeId: string;
+}) {
   return (
     <View className="gap-2">
       <WeekDays />
@@ -88,7 +94,7 @@ function Day({
       clerkId: userId!,
       date: item.dateValue,
       completed: item.dailyProgress?.completed == true ? false : true,
-      challengeId: challengesData![0].id,
+      challengeId: item.challengeId,
     };
 
     mutate(dailyProgressInput);

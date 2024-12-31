@@ -1,9 +1,17 @@
+import Calendar from "@/components/Calendar";
 import { ChallengeForm } from "@/components/ChallengeForm";
-import { useChallenges } from "@/lib/hooks/react-query/queries";
+import ChallengeInfo from "@/components/ChallengeInfo";
+import ImageList from "@/components/ImageList";
+import {
+  useChallenges,
+  useDailyProgress,
+} from "@/lib/hooks/react-query/queries";
+import { createCalendarDates } from "@/lib/util/dates";
 import {
   MaterialTopTabBarProps,
   createMaterialTopTabNavigator,
 } from "@react-navigation/material-top-tabs";
+import { Redirect } from "expo-router";
 import {
   Animated,
   Keyboard,
@@ -81,15 +89,43 @@ function MyTabBar({
 
 const ViewChallenge = ({ route }: any) => {
   const challengeId = route.params?.id;
-  console.log(challengeId);
+
+  const {
+    data: challengesData,
+    error,
+    isLoading: isChallengesLoading,
+  } = useChallenges();
+  const { isLoading: isDailyProgressDataLoading } = useDailyProgress();
+  const { data: dailyProgressData } = useDailyProgress();
+
+  const filteredDailyProgressData =
+    dailyProgressData?.filter((day) => day.challengeId === challengeId) || [];
+
+  if (isChallengesLoading || isDailyProgressDataLoading)
+    return <Text>Challenges data is loading...</Text>;
+
+  if (!challengesData || challengesData.length === 0)
+    return <Redirect href={"/challenge-forms/create"} />;
+
+  if (dailyProgressData == undefined) throw new Error();
+
+  const challenge = challengesData.find(
+    (challenge) => challenge.id === challengeId
+  )!;
+
+  const gridData = createCalendarDates(challenge, dailyProgressData);
 
   return (
-    <View className="flex-1 flex flex-col items-center gap-5 justify-center w-3/4 mx-auto">
-      <View className="w-full">
-        <Text className="font-bold text-xl">
-          {challengeId || "View Your Challenge!"}
-        </Text>
+    <View className="flex-1 mt-5" style={{ overflow: "scroll" }}>
+      <View className="w-5/6 mx-auto gap-5">
+        <ChallengeInfo challenge={challenge} gridData={gridData} />
+        <Calendar gridData={gridData} challengeId={challengeId} />
       </View>
+      <ScrollView className="w-full">
+        <View className="w-5/6 mx-auto">
+          <ImageList dailyProgressData={filteredDailyProgressData} />
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -142,7 +178,7 @@ export default function TabLayout() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarLabelStyle: { fontSize: 14 },
+        tabBarLabelStyle: { fontSize: 12 },
         tabBarItemStyle: { width: 100 },
         tabBarStyle: { backgroundColor: "powderblue" },
       }}

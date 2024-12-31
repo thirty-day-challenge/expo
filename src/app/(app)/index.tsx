@@ -1,29 +1,95 @@
 import Calendar from "@/components/Calendar";
+import { ChallengeForm } from "@/components/ChallengeForm";
 import ChallengeInfo from "@/components/ChallengeInfo";
-import SafeView from "@/components/SafeView";
+import ImageList from "@/components/ImageList";
 import {
   useChallenges,
   useDailyProgress,
 } from "@/lib/hooks/react-query/queries";
 import { createCalendarDates } from "@/lib/util/dates";
-import { DailyProgress } from "@30-day-challenge/prisma-zod";
-import { ErrorBoundaryProps, Redirect } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Dimensions, Image, ScrollView, Text, View } from "react-native";
+import {
+  MaterialTopTabBarProps,
+  createMaterialTopTabNavigator,
+} from "@react-navigation/material-top-tabs";
+import { Redirect } from "expo-router";
+import {
+  Animated,
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
-export function ErrorBoundary(props: ErrorBoundaryProps) {
+const Tab = createMaterialTopTabNavigator();
+
+function MyTabBar({
+  state,
+  descriptors,
+  navigation,
+  position,
+}: MaterialTopTabBarProps) {
   return (
-    <SafeView
-      top
-      className="flex-1 flex justify-center items-center bg-red-600"
-    >
-      <Text>{props.error.message}</Text>
-      <Text onPress={props.retry}>Try Again?</Text>
-    </SafeView>
+    <View className="flex-row py-2">
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const label =
+          options.tabBarLabel !== undefined
+            ? options.tabBarLabel
+            : options.title !== undefined
+            ? options.title
+            : route.name;
+
+        const isFocused = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name, route.params);
+          }
+        };
+
+        const onLongPress = () => {
+          navigation.emit({
+            type: "tabLongPress",
+            target: route.key,
+          });
+        };
+
+        return (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityLabel={options.tabBarAccessibilityLabel}
+            testID={options.tabBarTestID}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            style={{ backgroundColor: isFocused ? "#f0f0f0" : "#fff" }}
+            className="flex-1 py-3 rounded-md"
+            key={index}
+          >
+            <Animated.Text>
+              {typeof label === "function"
+                ? label({ focused: isFocused, color: "#000", children: "" })
+                : label}
+            </Animated.Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 }
 
-export default function Page() {
+const ViewChallenge = ({ route }: any) => {
+  const challengeId = route.params?.id;
+
   const {
     data: challengesData,
     error,
@@ -31,6 +97,9 @@ export default function Page() {
   } = useChallenges();
   const { isLoading: isDailyProgressDataLoading } = useDailyProgress();
   const { data: dailyProgressData } = useDailyProgress();
+
+  const filteredDailyProgressData =
+    dailyProgressData?.filter((day) => day.challengeId === challengeId) || [];
 
   if (isChallengesLoading || isDailyProgressDataLoading)
     return <Text>Challenges data is loading...</Text>;
@@ -40,73 +109,99 @@ export default function Page() {
 
   if (dailyProgressData == undefined) throw new Error();
 
-  const challenge = challengesData![0];
+  const challenge = challengesData.find(
+    (challenge) => challenge.id === challengeId
+  )!;
+
   const gridData = createCalendarDates(challenge, dailyProgressData);
 
   return (
-    <View className="flex-1" style={{ overflow: "scroll" }}>
+    <View className="flex-1 mt-5" style={{ overflow: "scroll" }}>
       <View className="w-5/6 mx-auto gap-5">
-        <ChallengeInfo challenge={challengesData[0]} gridData={gridData} />
-        <Calendar gridData={gridData} />
+        <ChallengeInfo challenge={challenge} gridData={gridData} />
+        <Calendar gridData={gridData} challengeId={challengeId} />
       </View>
       <ScrollView className="w-full">
         <View className="w-5/6 mx-auto">
-          <ImageList dailyProgressData={dailyProgressData} />
+          <ImageList dailyProgressData={filteredDailyProgressData} />
         </View>
       </ScrollView>
     </View>
   );
-}
+};
 
-function ImageList({
-  dailyProgressData,
-}: {
-  dailyProgressData: DailyProgress[];
-}) {
+const NewChallenge = () => {
   return (
-    <View className="flex flex-col gap-5">
-      <Text className="font-bold text-xl text-center">Progress Images</Text>
-      <View className="gap-5 flex flex-col-reverse">
-        {dailyProgressData.map((item, index) => (
-          <ImageListItem key={index} url={item.imageUrl} date={item.date} />
-        ))}
-      </View>
-    </View>
+    <KeyboardAvoidingView className="flex-1" behavior="padding" enabled>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View className="flex-1 flex flex-col items-center gap-5 justify-center mx-auto w-3/4">
+          <View className="w-full">
+            <Text className="font-bold text-xl">Create Your Challenge!</Text>
+          </View>
+          <ChallengeForm />
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
-}
+};
 
-function ImageListItem({ date, url }: { date: Date; url: string }) {
-  if (!url) return null;
-  const [aspectRatio, setAspectRatio] = useState(1);
+export default function TabLayout() {
+  const { data: challengesData } = useChallenges();
 
-  useEffect(() => {
-    Image.getSize(url, (width, height) => {
-      setAspectRatio(width / height);
+  const tabs = (() => {
+    let tabs: {
+      name: string;
+      component: ({ route }: { route: any }) => JSX.Element;
+      params?: {
+        id: string;
+      };
+    }[] = [];
+
+    challengesData?.forEach((challenge) => {
+      tabs.push({
+        name: challenge.title,
+        component: ViewChallenge,
+        params: {
+          id: challenge.id,
+        },
+      });
     });
-  }, [url]);
 
-  const screenWidth = Dimensions.get("window").width;
-  const screenHeight = Dimensions.get("window").height;
+    tabs.push({
+      name: "Create",
+      component: NewChallenge,
+    });
 
-  const imageContainerWidth = screenWidth * (5 / 6); // 5/6 of screen width
-  const calculatedHeight = imageContainerWidth / aspectRatio;
-  const maxHeight = screenHeight / 4; // Maximum height as 1/4 of the screen height
-
-  // Clamp the image height to the maximum value
-  const imageHeight = Math.min(calculatedHeight, maxHeight);
+    return tabs;
+  })();
 
   return (
-    <View className="flex flex-col gap-2">
-      <Text className="text-center text-md">{date.toLocaleDateString()}</Text>
-      <Image
-        source={{ uri: url }}
-        style={{
-          width: imageContainerWidth, // Keep the defined width
-          height: imageHeight,
-          alignSelf: "flex-start", // Ensure the image is aligned to the left
-        }}
-        resizeMode="contain"
-      />
-    </View>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarLabelStyle: { fontSize: 12 },
+        tabBarItemStyle: { width: 100 },
+        tabBarStyle: { backgroundColor: "powderblue" },
+      }}
+      tabBar={(props) => {
+        const currentTabRoute = props.state.routes[props.state.index]; // Get the active tab route
+        console.log("Current Tab Route:", currentTabRoute.name);
+
+        return <MyTabBar {...props} />;
+      }}
+    >
+      {tabs.map((tab) => {
+        return (
+          <Tab.Screen
+            key={tab.name}
+            name={tab.name}
+            component={tab.component}
+            initialParams={tab.params}
+            options={{
+              tabBarLabel: tab.name,
+            }}
+          />
+        );
+      })}
+    </Tab.Navigator>
   );
 }

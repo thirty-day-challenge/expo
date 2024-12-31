@@ -46,7 +46,7 @@ export default function Note() {
   const saveChanges = () => {
     const noteInput = {
       ...challengeData![0],
-      note: noteValue,
+      note: noteValue || undefined,
     };
 
     mutate(noteInput);
@@ -55,14 +55,8 @@ export default function Note() {
 
   return (
     <KeyboardAvoidingView className="flex-1" behavior="padding" enabled>
-      <Pressable
-        className="bg-black rounded-md p-2 absolute top-0 left-10 z-50"
-        onPress={() => router.back()}
-      >
-        <ArrowLeftFromLine size={20} color="white" />
-      </Pressable>
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <View className="flex flex-1 items-center justify-center gap-3">
+        <View className="flex flex-1 items-center justify-center gap-3 z-10">
           <View className="flex items-start w-2/3 mx-auto gap-5">
             <View>
               <Text className="text-lg font-bold">
@@ -86,6 +80,12 @@ export default function Note() {
           </View>
         </View>
       </TouchableWithoutFeedback>
+      <Pressable
+        className="bg-black rounded-md p-2 absolute top-0 left-10 z-50"
+        onPress={() => router.back()}
+      >
+        <ArrowLeftFromLine size={20} color="white" />
+      </Pressable>
     </KeyboardAvoidingView>
   );
 }

@@ -24,7 +24,7 @@ const apiRequest = async (
 
   try {
     const parsedData = schema.safeParse(response);
-    console.log(parsedData);
+    // console.log(parsedData);
     
     if (parsedData.error) throw new Error("Validation failed, route: " + route);
     const validatedData = parsedData.data;

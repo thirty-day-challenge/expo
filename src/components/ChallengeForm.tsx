@@ -24,7 +24,7 @@ export function ChallengeForm({ searchParams }: ChallengeFormProps) {
     wish = null,
     dailyAction = null,
     icon = null,
-    note = null,
+    note = "",
   } = searchParams || {};
 
   const { userId } = useAuth();
