@@ -5,7 +5,13 @@ import {
   MaterialTopTabBarProps,
   createMaterialTopTabNavigator,
 } from "@react-navigation/material-top-tabs";
+import { useEffect } from "react";
 import { Animated, TouchableOpacity, View } from "react-native";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  "Sending `onAnimatedValueUpdate` with no listeners registered",
+]);
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -56,7 +62,7 @@ function MyTabBar({
             onPress={onPress}
             onLongPress={onLongPress}
             style={{ backgroundColor: isFocused ? "#f0f0f0" : "#fff" }}
-            className="flex-1 py-3 rounded-md"
+            className="flex-1 py-3 px-0.5 rounded-md items-center justify-center"
             key={index}
           >
             <Animated.Text>
