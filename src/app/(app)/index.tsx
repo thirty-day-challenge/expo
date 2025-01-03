@@ -1,27 +1,11 @@
-import Calendar from "@/components/Calendar";
-import { ChallengeForm } from "@/components/ChallengeForm";
-import ChallengeInfo from "@/components/ChallengeInfo";
-import ImageList from "@/components/ImageList";
-import {
-  useChallenges,
-  useDailyProgress,
-} from "@/lib/hooks/react-query/queries";
-import { createCalendarDates } from "@/lib/util/dates";
+import NewChallenge from "@/components/index/NewChallenge";
+import ViewChallenge from "@/components/index/ViewChallenge";
+import { useChallenges } from "@/lib/hooks/react-query/queries";
 import {
   MaterialTopTabBarProps,
   createMaterialTopTabNavigator,
 } from "@react-navigation/material-top-tabs";
-import { Redirect } from "expo-router";
-import {
-  Animated,
-  Keyboard,
-  KeyboardAvoidingView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { Animated, TouchableOpacity, View } from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -87,64 +71,6 @@ function MyTabBar({
   );
 }
 
-const ViewChallenge = ({ route }: any) => {
-  const challengeId = route.params?.id;
-
-  const {
-    data: challengesData,
-    error,
-    isLoading: isChallengesLoading,
-  } = useChallenges();
-  const { isLoading: isDailyProgressDataLoading } = useDailyProgress();
-  const { data: dailyProgressData } = useDailyProgress();
-
-  const filteredDailyProgressData =
-    dailyProgressData?.filter((day) => day.challengeId === challengeId) || [];
-
-  if (isChallengesLoading || isDailyProgressDataLoading)
-    return <Text>Challenges data is loading...</Text>;
-
-  if (!challengesData || challengesData.length === 0)
-    return <Redirect href={"/challenge-forms/create"} />;
-
-  if (dailyProgressData == undefined) throw new Error();
-
-  const challenge = challengesData.find(
-    (challenge) => challenge.id === challengeId
-  )!;
-
-  const gridData = createCalendarDates(challenge, dailyProgressData);
-
-  return (
-    <View className="flex-1 mt-5" style={{ overflow: "scroll" }}>
-      <View className="w-5/6 mx-auto gap-5">
-        <ChallengeInfo challenge={challenge} gridData={gridData} />
-        <Calendar gridData={gridData} challengeId={challengeId} />
-      </View>
-      <ScrollView className="w-full">
-        <View className="w-5/6 mx-auto">
-          <ImageList dailyProgressData={filteredDailyProgressData} />
-        </View>
-      </ScrollView>
-    </View>
-  );
-};
-
-const NewChallenge = () => {
-  return (
-    <KeyboardAvoidingView className="flex-1" behavior="padding" enabled>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <View className="flex-1 flex flex-col items-center gap-5 justify-center mx-auto w-3/4">
-          <View className="w-full">
-            <Text className="font-bold text-xl">Create Your Challenge!</Text>
-          </View>
-          <ChallengeForm />
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-  );
-};
-
 export default function TabLayout() {
   const { data: challengesData } = useChallenges();
 
@@ -183,9 +109,6 @@ export default function TabLayout() {
         tabBarStyle: { backgroundColor: "powderblue" },
       }}
       tabBar={(props) => {
-        const currentTabRoute = props.state.routes[props.state.index]; // Get the active tab route
-        console.log("Current Tab Route:", currentTabRoute.name);
-
         return <MyTabBar {...props} />;
       }}
     >
