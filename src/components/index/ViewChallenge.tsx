@@ -17,25 +17,24 @@ const ViewChallenge = ({ route }: any) => {
     error,
     isLoading: isChallengesLoading,
   } = useChallenges();
-  const { isLoading: isDailyProgressDataLoading } = useDailyProgress();
-  const { data: dailyProgressData } = useDailyProgress();
-
-  const filteredDailyProgressData =
-    dailyProgressData?.filter((day) => day.challengeId === challengeId) || [];
+  const { data: dailyProgressData, isLoading: isDailyProgressDataLoading } =
+    useDailyProgress();
 
   if (isChallengesLoading || isDailyProgressDataLoading)
     return <Text>Challenges data is loading...</Text>;
 
-  if (!challengesData || challengesData.length === 0)
+  if (!challengesData || challengesData.length === 0 || !challengeId)
     return <Redirect href={"/challenge-forms/create"} />;
 
   if (dailyProgressData == undefined) throw new Error();
 
+  const dailyProgress =
+    dailyProgressData?.filter((day) => day.challengeId === challengeId) || [];
   const challenge = challengesData.find(
     (challenge) => challenge.id === challengeId
   )!;
 
-  const gridData = createCalendarDates(challenge, dailyProgressData);
+  const gridData = createCalendarDates(challenge, dailyProgress);
 
   return (
     <View className="flex-1 mt-5" style={{ overflow: "scroll" }}>
@@ -45,7 +44,7 @@ const ViewChallenge = ({ route }: any) => {
       </View>
       <ScrollView className="w-full">
         <View className="w-5/6 mx-auto">
-          <ImageList dailyProgressData={filteredDailyProgressData} />
+          <ImageList dailyProgressData={dailyProgress} />
         </View>
       </ScrollView>
     </View>

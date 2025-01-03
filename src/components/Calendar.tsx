@@ -88,6 +88,12 @@ function Day({
 
   const { mutate } = useDailyProgressMutation();
 
+  const challenge = challengesData?.find(
+    (challenge) => challenge.id === item.challengeId
+  );
+
+  if (!challenge) return null;
+
   function handlePress() {
     const dailyProgressInput: DailyProgressInput = {
       id: item.dailyProgress?.id || undefined,
@@ -110,7 +116,7 @@ function Day({
         )
       }
       onLongPress={handlePress}
-      disabled={!isDateValid(item.dateValue, challengesData![0].startDate)}
+      disabled={!isDateValid(item.dateValue, challenge.startDate)}
     >
       <View className={`w-full my-[3px] relative`}>
         <StridePadding index={index} item={item} />
@@ -121,16 +127,14 @@ function Day({
         >
           <Text
             className={
-              isDateValid(item.dateValue, challengesData![0].startDate)
+              isDateValid(item.dateValue, challenge.startDate)
                 ? "text-black font-bold"
                 : "text-gray-400"
             }
           >
             {!item.isPadding ? getDate(item.dateValue) : null}
           </Text>
-          <Text>
-            {item.dailyProgress?.completed ? challengesData![0].icon : null}
-          </Text>
+          <Text>{item.dailyProgress?.completed ? challenge.icon : null}</Text>
         </View>
       </View>
     </Pressable>
