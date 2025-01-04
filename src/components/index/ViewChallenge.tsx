@@ -21,7 +21,11 @@ const ViewChallenge = ({ route }: any) => {
     useDailyProgress();
 
   if (isChallengesLoading || isDailyProgressDataLoading)
-    return <Text>Challenges data is loading...</Text>;
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Challenges data is loading...</Text>
+      </View>
+    );
 
   if (!challengesData || challengesData.length === 0 || !challengeId)
     return <Redirect href={"/challenge-forms/create"} />;
