@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@30-day-challenge/prisma-zod": "^1.0.31",
+    "@30-day-challenge/prisma-zod": "^1.0.32",
     "@clerk/clerk-expo": "^1.1.4",
     "@prisma/client": "^5.14.0",
     "@react-navigation/material-top-tabs": "^6.6.14",
