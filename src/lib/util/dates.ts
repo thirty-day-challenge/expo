@@ -21,6 +21,7 @@ export type gridData = {
   dailyProgress: DailyProgress | undefined;
   leftCompleted?: boolean;
   rightCompleted?: boolean;
+  challengeId: string;
 }[];
 
 export const createCalendarDates = (
@@ -45,6 +46,7 @@ export const createCalendarDates = (
       dateValue: date,
       isPadding: true,
       dailyProgress: undefined,
+      challengeId: challenge.id
     });
   }
 
@@ -53,7 +55,7 @@ export const createCalendarDates = (
     let dailyProgress = undefined;
 
     dailyProgressData.forEach((dailyProgressDay) => {
-      if (isSameDay(date, dailyProgressDay.date))
+      if (isSameDay(date, dailyProgressDay.date) && dailyProgressDay.challengeId === challenge.id)
         dailyProgress = dailyProgressDay;
     });
 
@@ -61,6 +63,7 @@ export const createCalendarDates = (
       dateValue: date,
       isPadding: false,
       dailyProgress,
+      challengeId: challenge.id
     });
   });
 
@@ -71,6 +74,7 @@ export const createCalendarDates = (
       dateValue: date,
       isPadding: true,
       dailyProgress: undefined,
+      challengeId: challenge.id
     });
   }
 

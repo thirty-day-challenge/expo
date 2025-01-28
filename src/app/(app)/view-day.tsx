@@ -44,7 +44,6 @@ const useImagePicker = () => {
       allowsEditing: true,
       quality: 1,
     });
-
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
@@ -99,7 +98,6 @@ const DailyImage = () => {
 
 const ViewDay = () => {
   const searchParams = useLocalSearchParams<ViewDaySearchParams>();
-
   const { userId } = useAuth();
   const { mutate } = useDailyProgressMutation();
   const { data: dailyProgressData } = useDailyProgress();
@@ -118,9 +116,7 @@ const ViewDay = () => {
   ) {
     return <Redirect href={"/"} />;
   }
-
   const date = new Date(searchParams.date);
-
   const dailyProgress = dailyProgressData?.find(
     (dp) => dp.id === searchParams.id
   );
@@ -138,11 +134,9 @@ const ViewDay = () => {
       completed: dailyProgress?.completed || false,
       clerkId: userId!,
     };
-
     if (dailyProgress?.imageUrl === mutationInput.imageUrl) {
       // return;
     }
-
     mutate(mutationInput);
   };
 
@@ -150,24 +144,18 @@ const ViewDay = () => {
     if (isChallengesLoading) {
       return;
     }
-
     if (dailyProgress?.imageUrl && dailyProgress?.imageUrl !== image) {
       await deleteImage(dailyProgress.imageUrl);
     }
-
     let url = "";
     if (image === dailyProgress?.imageUrl) {
       url = image;
     } else if (image && (!dailyProgress || image !== dailyProgress.imageUrl)) {
       const base64 = await convertToBase64(image!);
-
       if (!base64) return;
-
       url = await uploadImage(base64);
     }
-
     handleMutation(url);
-
     router.back();
   };
 
@@ -194,5 +182,4 @@ const ViewDay = () => {
     </View>
   );
 };
-
 export default ViewDay;

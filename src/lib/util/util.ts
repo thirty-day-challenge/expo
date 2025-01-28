@@ -14,16 +14,18 @@ const apiRequest = async (
   json: any,
   schema: ZodType<any, any, any>
 ) => {
-  const url = `${process.env.EXPO_PUBLIC_NEXTJS_URL}${route}`;
+  const url = `${process.env.EXPO_PUBLIC_NEXTJS_URL}${route}`; 
 
   const response = await ky[method](url, { json })
     .json()
     .catch((e) => {
       console.error(e);
-    });
+    });    
 
   try {
     const parsedData = schema.safeParse(response);
+    // console.log(parsedData);
+    
     if (parsedData.error) throw new Error("Validation failed, route: " + route);
     const validatedData = parsedData.data;
     return validatedData;
