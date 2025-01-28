@@ -94,7 +94,7 @@ function Form() {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  className="ios:py-0.5"
+                  className="ios:py-1"
                 />
               </View>
             )}
@@ -120,7 +120,7 @@ function Form() {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  className="ios:py-0.5"
+                  className="ios:py-1"
                 />
               </View>
             )}
@@ -149,7 +149,7 @@ function Form() {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  className="ios:py-0.5"
+                  className="ios:py-1"
                 />
               </View>
             )}
