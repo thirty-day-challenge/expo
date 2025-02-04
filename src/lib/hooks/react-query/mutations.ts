@@ -23,7 +23,7 @@ export const useChallengeMutation = (id: string | undefined) => {
 
         return [...oldData, data];
       });
-      router.push("/");
+      router.back();
     },
   });
 };

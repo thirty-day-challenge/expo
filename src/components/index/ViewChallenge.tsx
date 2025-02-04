@@ -9,9 +9,7 @@ import { createCalendarDates } from "@/lib/util/dates";
 import { Redirect } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
-const ViewChallenge = ({ route }: any) => {
-  const challengeId = route.params?.id;
-
+const ViewChallenge = ({ challengeId }: { challengeId: string }) => {
   const {
     data: challengesData,
     error,
@@ -41,7 +39,7 @@ const ViewChallenge = ({ route }: any) => {
   const gridData = createCalendarDates(challenge, dailyProgress);
 
   return (
-    <View className="flex-1 mt-5" style={{ overflow: "scroll" }}>
+    <View className="flex-1 mt-14" style={{ overflow: "scroll" }}>
       <View className="w-5/6 mx-auto gap-5">
         <ChallengeInfo challenge={challenge} gridData={gridData} />
         <Calendar gridData={gridData} challengeId={challengeId} />

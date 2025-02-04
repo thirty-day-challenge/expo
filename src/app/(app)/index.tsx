@@ -1,136 +1,66 @@
-import NewChallenge from "@/components/index/NewChallenge";
-import ViewChallenge from "@/components/index/ViewChallenge";
-import { useChallenges } from "@/lib/hooks/react-query/queries";
-import {
-  MaterialTopTabBarProps,
-  createMaterialTopTabNavigator,
-} from "@react-navigation/material-top-tabs";
-import { useEffect } from "react";
-import { Animated, TouchableOpacity, View } from "react-native";
-import { LogBox } from "react-native";
+import { challenges, useChallenges } from "@/lib/hooks/react-query/queries";
+import { Link } from "expo-router";
+import { FlatList, ListRenderItemInfo, Text, View } from "react-native";
 
-LogBox.ignoreLogs([
-  "Sending `onAnimatedValueUpdate` with no listeners registered",
-]);
+const Item = ({ item }: ListRenderItemInfo<challenges[number] | "CREATE">) => {
+  if (item === null) {
+    return <View style={{ flex: 1, width: "48%", padding: 8 }} />;
+  }
 
-const Tab = createMaterialTopTabNavigator();
-
-function MyTabBar({
-  state,
-  descriptors,
-  navigation,
-  position,
-}: MaterialTopTabBarProps) {
   return (
-    <View className="flex-row py-2">
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
-
-        const isFocused = state.index === index;
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
-          }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: "tabLongPress",
-            target: route.key,
-          });
-        };
-
-        return (
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={options.tabBarTestID}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={{ backgroundColor: isFocused ? "#f0f0f0" : "#fff" }}
-            className="flex-1 py-3 px-0.5 rounded-md items-center justify-center"
-            key={index}
-          >
-            <Animated.Text>
-              {typeof label === "function"
-                ? label({ focused: isFocused, color: "#000", children: "" })
-                : label}
-            </Animated.Text>
-          </TouchableOpacity>
-        );
-      })}
+    <View className="w-[48%] p-2">
+      <Link
+        href={
+          item === "CREATE"
+            ? "challenge-forms/create"
+            : {
+                pathname: "view-challenge/[challengeId]",
+                params: { challengeId: item.id },
+              }
+        }
+        className="flex-1 h-full"
+      >
+        <View className="flex-1">
+          <View className="aspect-square w-full bg-neutral-200 rounded-lg justify-center items-center">
+            {item === "CREATE" ? (
+              <Text
+                className="text-[60px]"
+                style={{ lineHeight: 120, includeFontPadding: false }}
+              >
+                ➕
+              </Text>
+            ) : (
+              <Text
+                className="text-[60px]"
+                style={{ lineHeight: 120, includeFontPadding: false }}
+              >
+                {item.icon}
+              </Text>
+            )}
+          </View>
+          <Text className="text-center mt-2">
+            {item === "CREATE" ? "Create Challenge" : item.title}
+          </Text>
+        </View>
+      </Link>
     </View>
   );
-}
+};
 
-export default function TabLayout() {
-  const { data: challengesData } = useChallenges();
-
-  const tabs = (() => {
-    let tabs: {
-      name: string;
-      component: ({ route }: { route: any }) => JSX.Element;
-      params?: {
-        id: string;
-      };
-    }[] = [];
-
-    challengesData?.forEach((challenge) => {
-      tabs.push({
-        name: challenge.title,
-        component: ViewChallenge,
-        params: {
-          id: challenge.id,
-        },
-      });
-    });
-
-    tabs.push({
-      name: "Create",
-      component: NewChallenge,
-    });
-
-    return tabs;
-  })();
+export default function Index() {
+  const { data: challengeData } = useChallenges();
 
   return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarLabelStyle: { fontSize: 12 },
-        tabBarItemStyle: { width: 100 },
-        tabBarStyle: { backgroundColor: "powderblue" },
-      }}
-      tabBar={(props) => {
-        return <MyTabBar {...props} />;
-      }}
-    >
-      {tabs.map((tab) => {
-        return (
-          <Tab.Screen
-            key={tab.name}
-            name={tab.name}
-            component={tab.component}
-            initialParams={tab.params}
-            options={{
-              tabBarLabel: tab.name,
-            }}
-          />
-        );
-      })}
-    </Tab.Navigator>
+    <View className="flex-1 px-4 py-2 gap-5">
+      <Text className="text-3xl font-bold">Your Challenges:</Text>
+      <FlatList
+        data={["CREATE", ...(challengeData?.reverse() || [])]}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        contentContainerStyle={{ gap: 20 }}
+        renderItem={Item}
+        keyExtractor={(item) => (item === "CREATE" ? "CREATE" : item.id)}
+      />
+    </View>
   );
 }
