@@ -23,7 +23,12 @@ export const useChallengeMutation = (id: string | undefined) => {
 
         return [...oldData, data];
       });
-      router.back();
+
+      if (id) {
+        router.back();
+      } else {
+        router.replace(`view-challenge/${data.id}`)
+      }
     },
   });
 };

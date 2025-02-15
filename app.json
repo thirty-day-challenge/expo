@@ -2,7 +2,7 @@
   "expo": {
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
-    "orientation": "default",
+    "orientation": "portrait",
     "web": {
       "output": "static",
       "bundler": "metro"
@@ -22,14 +22,24 @@
         }
       ]
     ],
-    "name": "30-day-challenge",
-    "slug": "30-day-challenge",
+    "name": "30 Day Me",
+    "slug": "30-day-me",
+    "version": "1.0.0",
     "android": {
-      "package": "com.expo.test",
+      "package": "com.30-day-me.android",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "ios": {
-      "bundleIdentifier": "com.expo.test"
+      "bundleIdentifier": "com.your-apple-org-name.your-app-name",
+      "buildNumber": "1.0.0"
+    },
+    "extra": {
+      "router": {
+        "origin": "https://n"
+      },
+      "eas": {
+        "projectId": "a98f45bb-71e8-4a13-9cd5-42d36e1f5fd0"
+      }
     }
   }
 }
